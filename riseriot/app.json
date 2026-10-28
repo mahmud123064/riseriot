@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "RiseRiot",
+    "slug": "riseriot",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0d091a",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.riseriot.app"
+    },
+    "android": {
+      "package": "com.riseriot.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0d091a",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-splash-screen",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "sounds": [
+            "./assets/adhan_sound/azan.mp3"
+          ]
+        }
+      ],
+      "expo-asset"
+    ]
+  }
+}
