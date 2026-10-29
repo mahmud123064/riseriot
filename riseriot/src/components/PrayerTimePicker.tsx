@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { prayerLabel } from '../constants/prayers'
 import type { Prayer } from '../store/prayers'
+import { useTheme } from '../theme/ThemeProvider'
 import { Text } from './Text'
 import { Wheel } from './Wheel'
 
@@ -43,6 +44,7 @@ function PickerSheet({
   onSave: (hour: number, minute: number) => void
 }) {
   const insets = useSafeAreaInsets()
+  const { tokens } = useTheme()
   // The sheet remounts whenever a prayer is opened, so this initializer always
   // receives the prayer's current time.
   const [hour24, setHour24] = useState(prayer.hour)
@@ -65,7 +67,7 @@ function PickerSheet({
   }
 
   return (
-    <View className="flex-1 justify-end bg-black/65">
+    <View className="flex-1 justify-end bg-app-scrim">
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Close prayer time"
@@ -75,10 +77,10 @@ function PickerSheet({
 
       <View
         accessibilityViewIsModal
-        className="w-full max-w-md self-center rounded-t-[32px] border-x border-t border-app-border/40 bg-app-panel px-5 pt-3"
+        className="w-full max-w-md self-center rounded-t-[32px] border-x border-t border-app-line bg-app-panel px-5 pt-3"
         style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}
       >
-        <View className="h-1.5 w-12 self-center rounded-full bg-white/15" />
+        <View className="h-1.5 w-12 self-center rounded-full bg-app-surface-strong" />
 
         <View className="mt-4 flex-row items-center justify-between">
           <View>
@@ -94,9 +96,9 @@ function PickerSheet({
             accessibilityLabel="Close prayer time"
             hitSlop={8}
             onPress={onClose}
-            className="h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5"
+            className="h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
           >
-            <X size={18} color="rgba(255,255,255,0.7)" />
+            <X size={18} color={tokens.muted} />
           </Pressable>
         </View>
 
@@ -104,7 +106,7 @@ function PickerSheet({
           <View className="w-20">
             <Wheel label="Hour" data={HOURS} value={hour12} onChange={selectHour} />
           </View>
-          <Text variant="display" className="mx-1 text-3xl font-bold text-white/30">
+          <Text variant="display" className="mx-1 text-3xl font-bold text-app-faint">
             :
           </Text>
           <View className="w-20">
@@ -116,7 +118,7 @@ function PickerSheet({
               format={formatMinute}
             />
           </View>
-          <View className="ml-4 gap-1 rounded-full border border-app-border/40 bg-white/5 p-1">
+          <View className="ml-4 gap-1 rounded-full border border-app-line bg-app-surface p-1">
             {(['AM', 'PM'] as const).map((value) => {
               const selected = meridiem === value
               return (
@@ -126,10 +128,12 @@ function PickerSheet({
                   accessibilityLabel={`Set ${value}`}
                   accessibilityState={{ selected }}
                   onPress={() => selectMeridiem(value)}
-                  className={`rounded-full px-3.5 py-2 ${selected ? 'bg-app-orchid' : ''}`}
+                  className={`rounded-full px-3.5 py-2 ${selected ? 'bg-app-accent-strong' : ''}`}
                 >
                   <Text
-                    className={`text-xs font-bold ${selected ? 'text-white' : 'text-app-muted'}`}
+                    className={`text-xs font-bold ${
+                      selected ? 'text-white' : 'text-app-muted'
+                    }`}
                   >
                     {value}
                   </Text>
@@ -147,7 +151,7 @@ function PickerSheet({
           accessibilityRole="button"
           accessibilityLabel={`Save ${prayerLabel(prayer.id)} time`}
           onPress={save}
-          className="items-center rounded-2xl bg-app-orchid py-4"
+          className="items-center rounded-2xl bg-app-accent-strong py-4"
         >
           <Text className="text-sm font-bold text-white">Save time</Text>
         </Pressable>

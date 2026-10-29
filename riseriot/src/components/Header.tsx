@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react-native'
 import { Pressable, View } from 'react-native'
 
+import { useTheme } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
 type HeaderProps = {
@@ -11,6 +12,8 @@ type HeaderProps = {
 }
 
 export function Header({ eyebrow, title, back, onBack }: HeaderProps) {
+  const { tokens } = useTheme()
+
   return (
     <View className="flex-row items-center gap-3">
       {back ? (
@@ -18,9 +21,9 @@ export function Header({ eyebrow, title, back, onBack }: HeaderProps) {
           accessibilityRole="button"
           accessibilityLabel="Go back"
           onPress={onBack}
-          className="rounded-full border border-white/10 p-2"
+          className="rounded-full border border-app-line p-2"
         >
-          <ChevronLeft size={20} color="rgba(255,255,255,0.7)" />
+          <ChevronLeft size={20} color={tokens.muted} />
         </Pressable>
       ) : null}
       <View>

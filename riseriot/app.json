@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
+    "userInterfaceStyle": "automatic",
     "backgroundColor": "#0d091a",
     "ios": {
       "supportsTablet": true,
@@ -41,7 +41,18 @@
           ]
         }
       ],
-      "expo-asset"
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "RiseRiot uses the camera for the wake-up movement challenge.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      "expo-asset",
+      "expo-sqlite",
+      "./modules/rise-alarm/app.plugin.js"
     ]
   }
 }

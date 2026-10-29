@@ -10,8 +10,8 @@ import {
   removeStopwatchSession,
   subscribeStopwatchHistory,
 } from '../store/stopwatchHistory'
-import { colors } from '../theme/colors'
 import { fonts } from '../theme/fonts'
+import { useTheme } from '../theme/ThemeProvider'
 
 const SAVED_CLOCK = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit' })
 
@@ -26,6 +26,7 @@ function formatElapsed(ms: number) {
 }
 
 export function StopwatchScreen() {
+  const { tokens } = useTheme()
   const [running, setRunning] = useState(false)
   const [elapsed, setElapsed] = useState(0)
   const [note, setNote] = useState('')
@@ -60,7 +61,7 @@ export function StopwatchScreen() {
     <View className="gap-8">
       <Header eyebrow="Stay in the moment" title="Stopwatch" />
       <View className="flex-col items-center py-10">
-        <View className="h-64 w-64 items-center justify-center rounded-full border border-[#9b61ff]/40 bg-app-panel">
+        <View className="h-64 w-64 items-center justify-center rounded-full border border-app-accent-line bg-app-panel">
           <Text
             className="text-5xl font-medium text-app-ink"
             style={{ fontVariant: ['tabular-nums'] }}
@@ -72,7 +73,7 @@ export function StopwatchScreen() {
           accessibilityRole="button"
           accessibilityLabel={running ? 'Pause stopwatch' : 'Start stopwatch'}
           onPress={() => setRunning(!running)}
-          className="mt-10 h-16 w-16 items-center justify-center rounded-full bg-[#a969ff]"
+          className="mt-10 h-16 w-16 items-center justify-center rounded-full bg-app-accent-strong"
         >
           {running ? (
             <View className="h-5 w-5 rounded-sm bg-white" />
@@ -82,7 +83,7 @@ export function StopwatchScreen() {
         </Pressable>
       </View>
 
-      <View className="rounded-[24px] border border-app-border/35 bg-app-card p-5">
+      <View className="rounded-[24px] border border-app-line bg-app-card p-5">
         <View className="flex-row items-end justify-between">
           <View>
             <Text className="text-xs font-medium uppercase tracking-[.16em] text-app-muted">
@@ -107,11 +108,11 @@ export function StopwatchScreen() {
                 value={note}
                 onChangeText={setNote}
                 placeholder="e.g. Reading, Gym, Focus work"
-                placeholderTextColor="rgba(255,255,255,0.32)"
+                placeholderTextColor={tokens.faint}
                 maxLength={60}
                 returnKeyType="done"
                 onSubmitEditing={save}
-                className="rounded-2xl border border-app-border/40 bg-white/5 px-4 py-3 text-sm text-app-ink"
+                className="rounded-2xl border border-app-line bg-app-surface px-4 py-3 text-sm text-app-ink"
                 style={{ fontFamily: fonts.body }}
               />
             </View>
@@ -120,7 +121,7 @@ export function StopwatchScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Save this time to history"
                 onPress={save}
-                className="rounded-full bg-app-orchid px-4 py-2"
+                className="rounded-full bg-app-accent-strong px-4 py-2"
               >
                 <Text className="text-xs font-bold text-white">Save time</Text>
               </Pressable>
@@ -128,9 +129,9 @@ export function StopwatchScreen() {
                 accessibilityRole="button"
                 accessibilityLabel="Reset stopwatch"
                 onPress={reset}
-                className="rounded-full border border-app-border/40 bg-white/5 px-4 py-2"
+                className="rounded-full border border-app-line bg-app-surface px-4 py-2"
               >
-                <Text className="text-xs font-medium text-white">Reset</Text>
+                <Text className="text-xs font-medium text-app-ink">Reset</Text>
               </Pressable>
             </View>
           </View>
@@ -146,7 +147,7 @@ export function StopwatchScreen() {
         </View>
 
         {sessions.length === 0 ? (
-          <View className="rounded-[22px] border border-app-border/35 bg-app-panel p-5">
+          <View className="rounded-[22px] border border-app-line bg-app-panel p-5">
             <Text className="text-sm text-app-muted">
               No saved times yet. Run the stopwatch and tap Save time.
             </Text>
@@ -157,10 +158,10 @@ export function StopwatchScreen() {
             return (
               <View
                 key={session.id}
-                className="flex-row items-center gap-4 rounded-[22px] border border-app-border/35 bg-app-panel p-4"
+                className="flex-row items-center gap-4 rounded-[22px] border border-app-line bg-app-panel p-4"
               >
-                <View className="h-11 w-11 items-center justify-center rounded-full bg-[#3c2370]">
-                  <Timer size={19} color={colors.lilac} />
+                <View className="h-11 w-11 items-center justify-center rounded-full bg-app-accent-deep">
+                  <Timer size={19} color={tokens.accentText} />
                 </View>
                 <View className="flex-1">
                   {session.note ? (
@@ -186,9 +187,9 @@ export function StopwatchScreen() {
                   )}`}
                   hitSlop={8}
                   onPress={() => removeStopwatchSession(session.id)}
-                  className="h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5"
+                  className="h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
                 >
-                  <Trash2 size={16} color="#ff8a8a" />
+                  <Trash2 size={16} color={tokens.dangerInk} />
                 </Pressable>
               </View>
             )

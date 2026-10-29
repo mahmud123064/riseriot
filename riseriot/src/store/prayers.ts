@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { enqueueWrite } from '../db/database'
+import { getSetting, setSetting } from '../db/settings'
 
 export const PRAYER_IDS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'] as const
 
@@ -13,7 +14,7 @@ export type Prayer = {
   enabled: boolean
 }
 
-const STORAGE_KEY = 'riseriot/prayers/v1'
+const STORAGE_KEY = 'prayers.v1'
 
 // Times are placeholders until the user sets them; nothing is enabled by default.
 const DEFAULT_PRAYERS: Prayer[] = [
@@ -33,7 +34,7 @@ function publish(next: Prayer[]) {
 }
 
 function persist(next: Prayer[]) {
-  AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next)).catch(() => {})
+  void enqueueWrite(() => setSetting(STORAGE_KEY, JSON.stringify(next)))
 }
 
 export function subscribePrayers(listener: () => void) {
@@ -82,10 +83,12 @@ function normalize(value: unknown): Prayer | null {
 /**
  * Reads persisted times and merges them over the defaults by id, so a future
  * prayer added to the app still shows up when an older payload is stored.
+ * `getSetting` awaits the shared database connection, so this is safe to call
+ * as soon as the app starts.
  */
 export async function loadPrayers() {
   try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY)
+    const raw = await getSetting(STORAGE_KEY)
     if (!raw) return
     const parsed: unknown = JSON.parse(raw)
     if (!Array.isArray(parsed)) return

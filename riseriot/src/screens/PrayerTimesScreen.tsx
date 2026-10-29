@@ -15,9 +15,11 @@ import {
   togglePrayer,
   type PrayerId,
 } from '../store/prayers'
+import { useTheme } from '../theme/ThemeProvider'
 import { formatAlarmTime } from '../utils/alarms'
 
 export function PrayerTimesScreen({ onBack }: { onBack: () => void }) {
+  const { tokens } = useTheme()
   const prayers = useSyncExternalStore(subscribePrayers, getPrayers)
   const [editingId, setEditingId] = useState<PrayerId | null>(null)
   const editing = editingId ? prayers.find((prayer) => prayer.id === editingId) ?? null : null
@@ -42,9 +44,9 @@ export function PrayerTimesScreen({ onBack }: { onBack: () => void }) {
     <View className="gap-5">
       <Header eyebrow="Settings" title="Prayer times" back onBack={onBack} />
 
-      <View className="flex-row items-center gap-3 rounded-[22px] border border-app-border/35 bg-app-panel p-4">
-        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-[#7b50ed]/25">
-          <Volume2 size={20} color="#c5a2ff" />
+      <View className="flex-row items-center gap-3 rounded-[22px] border border-app-line bg-app-panel p-4">
+        <View className="h-11 w-11 items-center justify-center rounded-2xl bg-app-accent-wash">
+          <Volume2 size={20} color={tokens.accentIcon} />
         </View>
         <View className="flex-1">
           <Text className="text-sm font-medium text-app-ink">Adhan at prayer time</Text>
@@ -67,7 +69,7 @@ export function PrayerTimesScreen({ onBack }: { onBack: () => void }) {
           return (
             <View
               key={id}
-              className="flex-row items-center gap-4 rounded-[24px] border border-app-border/35 bg-app-card p-5"
+              className="flex-row items-center gap-4 rounded-[24px] border border-app-line bg-app-card p-5"
             >
               <Pressable
                 accessibilityRole="button"
@@ -81,14 +83,14 @@ export function PrayerTimesScreen({ onBack }: { onBack: () => void }) {
                 <Text
                   variant="display"
                   className={`mt-1 text-4xl font-bold tracking-[-.04em] ${
-                    prayer.enabled ? 'text-app-ink' : 'text-app-ink/40'
+                    prayer.enabled ? 'text-app-ink' : 'text-app-ink-dim'
                   }`}
                 >
                   {time}
                   <Text
                     variant="display"
                     className={`ml-2 text-base tracking-normal ${
-                      prayer.enabled ? 'text-white/45' : 'text-white/25'
+                      prayer.enabled ? 'text-app-muted' : 'text-app-faint'
                     }`}
                   >
                     {meridiem}

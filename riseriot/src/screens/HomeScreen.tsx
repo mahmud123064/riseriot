@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 
 import { Text } from '../components/Text'
 import { Toggle } from '../components/Toggle'
-import { colors, heroShadow } from '../theme/colors'
+import { useTheme } from '../theme/ThemeProvider'
 import type { TabId } from '../types'
 import { getDayPeriod } from '../utils/time'
 
@@ -16,6 +16,7 @@ const PERIOD = {
 } as const
 
 export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
+  const { tokens } = useTheme()
   const [active, setActive] = useState(true)
   // The hero card describes the next alarm, so its copy and icon follow the alarm's time.
   const alarmHour = 7 // wire to the real alarm once alarms are stored
@@ -36,21 +37,20 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
             className="mt-1 text-[30px] font-bold tracking-[-.04em] text-app-ink"
           >
             {greeting}
-           
           </Text>
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Notifications"
-          className="rounded-full border border-white/10 bg-white/5 p-3"
+          className="rounded-full border border-app-line bg-app-surface p-3"
         >
-          <Bell size={19} color={colors.ink} />
+          <Bell size={19} color={tokens.ink} />
         </Pressable>
       </View>
 
-      <View style={heroShadow} className="rounded-[30px]">
+      <View style={tokens.heroShadow} className="rounded-[30px]">
         <LinearGradient
-          colors={colors.heroGradient}
+          colors={tokens.heroGradient}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
@@ -105,17 +105,17 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
       </View>
 
       <View className="flex-row gap-3">
-        <View className="flex-1 rounded-[22px] border border-app-border/35 bg-app-card p-4">
-          <Moon size={19} color={colors.iconTint} />
+        <View className="flex-1 rounded-[22px] border border-app-line bg-app-card p-4">
+          <Moon size={19} color={tokens.accentIcon} />
           <Text className="mt-5 text-xs text-app-muted">Sleep reminder</Text>
           <Text className="mt-1 font-medium text-app-ink">10:30 PM</Text>
-          <Text className="mt-2 text-xs text-[#ce9dff]">In 3 hours</Text>
+          <Text className="mt-2 text-xs text-app-accent-icon">In 3 hours</Text>
         </View>
-        <View className="flex-1 rounded-[22px] border border-app-border/35 bg-app-card p-4">
-          <Flame size={19} color={colors.amber} fill={colors.amber} />
+        <View className="flex-1 rounded-[22px] border border-app-line bg-app-card p-4">
+          <Flame size={19} color={tokens.amber} fill={tokens.amber} />
           <Text className="mt-5 text-xs text-app-muted">Wake streak</Text>
           <Text className="mt-1 font-medium text-app-ink">12 days</Text>
-          <Text className="mt-2 text-xs text-[#ffba70]">Keep it going!</Text>
+          <Text className="mt-2 text-xs text-app-amber">Keep it going!</Text>
         </View>
       </View>
 
@@ -126,8 +126,8 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
             <Text className="text-sm text-app-muted">View insights</Text>
           </Pressable>
         </View>
-        <View className="flex-row items-center gap-4 rounded-[22px] border border-app-border/35 bg-app-card p-4">
-          <Heart size={24} color={colors.iconTint} />
+        <View className="flex-row items-center gap-4 rounded-[22px] border border-app-line bg-app-card p-4">
+          <Heart size={24} color={tokens.accentIcon} />
           <View className="flex-1">
             <Text className="font-medium text-app-ink">You&apos;ve got this</Text>
             <Text className="mt-1 text-sm text-app-muted">

@@ -7,12 +7,25 @@ import { useEffect } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import RiseRiotApp from './src/RiseRiotApp'
+import { rescheduleAllAlarms } from './src/alarmScheduler'
 import { AdhanSound } from './src/components/AdhanSound'
-import { initNotifications } from './src/notifications'
+import { AlarmGate } from './src/components/AlarmGate'
+import { initDatabase } from './src/db/database'
+import { cleanupAlarmHistory } from './src/db/history'
+import { ensureNotificationPermission, initNotifications } from './src/notifications'
+import { getAlarms, loadAlarms } from './src/store/alarms'
 import { loadPrayers } from './src/store/prayers'
+import { loadPreferences } from './src/store/preferences'
+import { loadStopwatchHistory } from './src/store/stopwatchHistory'
 import { fontFamilies } from './src/theme/fonts'
+import { ThemeProvider, useTheme } from './src/theme/ThemeProvider'
 
 SplashScreen.preventAutoHideAsync().catch(() => {})
+
+function ThemedStatusBar() {
+  const { tokens } = useTheme()
+  return <StatusBar style={tokens.isDark ? 'light' : 'dark'} />
+}
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts(fontFamilies)
@@ -24,9 +37,22 @@ export default function App() {
   }, [fontsLoaded, fontError])
 
   useEffect(() => {
-    // Load saved prayer times before (re)scheduling, otherwise stale defaults would be armed.
+    // Load saved state before scheduling anything, otherwise stale defaults would be armed.
     void (async () => {
-      await loadPrayers()
+      const prayersLoaded = loadPrayers()
+      try {
+        await initDatabase()
+        await Promise.all([loadAlarms(), loadPreferences(), loadStopwatchHistory()])
+        await cleanupAlarmHistory()
+      } catch {
+        // SQLite unavailable: in-memory defaults keep the app usable.
+      }
+      await prayersLoaded
+      // Alarm specs come from storage, so schedule only after the load settled.
+      rescheduleAllAlarms(getAlarms())
+      if (getAlarms().some((alarm) => alarm.enabled)) {
+        await ensureNotificationPermission()
+      }
       await initNotifications()
     })()
   }, [])
@@ -38,9 +64,12 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar style="light" />
-      <AdhanSound />
-      <RiseRiotApp />
+      <ThemeProvider>
+        <ThemedStatusBar />
+        <AdhanSound />
+        <AlarmGate />
+        <RiseRiotApp />
+      </ThemeProvider>
     </SafeAreaProvider>
   )
 }

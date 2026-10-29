@@ -15,10 +15,12 @@ export function Toggle({
       accessibilityLabel={label ?? (active ? 'Disable alarm' : 'Enable alarm')}
       accessibilityState={{ checked: active }}
       onPress={onClick}
-      className={`h-7 w-12 rounded-full ${active ? 'bg-app-purple' : 'bg-white/15'}`}
+      className={`h-7 w-12 rounded-full ${active ? 'bg-app-accent-strong' : 'bg-app-surface-strong'}`}
     >
       <View
-        className={`absolute top-1 h-5 w-5 rounded-full bg-white ${active ? 'left-6' : 'left-1'}`}
+        className={`absolute top-1 h-5 w-5 rounded-full ${
+          active ? 'left-6 bg-white' : 'left-1 bg-app-muted'
+        }`}
       />
     </Pressable>
   )

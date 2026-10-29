@@ -9,6 +9,8 @@ import {
   type ScrollViewInstance,
 } from 'react-native'
 
+import { useTheme } from '../theme/ThemeProvider'
+import { withAlpha } from '../utils/color'
 import { Text } from './Text'
 
 const ITEM_HEIGHT = 44
@@ -30,11 +32,15 @@ type WheelProps = {
  * so the picked value is always the row resting in the band.
  */
 export function Wheel({ label, data, value, onChange, format = String }: WheelProps) {
+  const { tokens } = useTheme()
   const scrollRef = useRef<ScrollViewInstance | null>(null)
   // Captured once per mount so re-renders with a new `value` never jump the wheel.
   const [initialIndex] = useState(() => Math.max(0, data.indexOf(value)))
   const lastIndex = useRef(initialIndex)
   const initialized = useRef(false)
+
+  const fadeTop = [tokens.panel, withAlpha(tokens.panel, 0.75), withAlpha(tokens.panel, 0)] as const
+  const fadeBottom = [withAlpha(tokens.panel, 0), withAlpha(tokens.panel, 0.75), tokens.panel] as const
 
   function scrollToIndex(index: number, animated: boolean) {
     const clamped = Math.min(data.length - 1, Math.max(0, index))
@@ -63,7 +69,7 @@ export function Wheel({ label, data, value, onChange, format = String }: WheelPr
     <View style={{ height: ITEM_HEIGHT * VISIBLE_ITEMS }} className="w-full overflow-hidden">
       <View
         pointerEvents="none"
-        className="absolute inset-x-0 rounded-2xl border-y border-white/10 bg-white/5"
+        className="absolute inset-x-0 rounded-2xl border-y border-app-line bg-app-surface"
         style={{ top: EDGE_PADDING, height: ITEM_HEIGHT }}
       />
 
@@ -98,7 +104,7 @@ export function Wheel({ label, data, value, onChange, format = String }: WheelPr
               <Text
                 variant="display"
                 className={`text-2xl ${
-                  selected ? 'font-bold text-app-ink' : 'text-app-muted/50'
+                  selected ? 'font-bold text-app-ink' : 'text-app-faint'
                 }`}
                 style={{ fontVariant: ['tabular-nums'] }}
               >
@@ -111,12 +117,12 @@ export function Wheel({ label, data, value, onChange, format = String }: WheelPr
 
       <LinearGradient
         pointerEvents="none"
-        colors={['#171129', 'rgba(23,17,41,0.75)', 'rgba(23,17,41,0)']}
+        colors={fadeTop}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, height: EDGE_PADDING }}
       />
       <LinearGradient
         pointerEvents="none"
-        colors={['rgba(23,17,41,0)', 'rgba(23,17,41,0.75)', '#171129']}
+        colors={fadeBottom}
         style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: EDGE_PADDING }}
       />
     </View>

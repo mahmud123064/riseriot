@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 
 import { Header } from '../components/Header'
 import { Text } from '../components/Text'
-import { colors } from '../theme/colors'
+import { useTheme } from '../theme/ThemeProvider'
 
 type Range = 'week' | 'month' | 'all'
 
@@ -42,7 +42,6 @@ const RANGES: Record<Range, { label: string; title: string }> = {
 
 const CHART_MAX_HOURS = 9
 const GRID_HOURS = [9, 6, 3]
-const SELECTED_BAR = ['#d6b7ff', '#9b61ff'] as const
 const HISTORY_DAYS = 90
 const DAY_LABEL_WIDTH = 46
 
@@ -156,6 +155,8 @@ const BUCKETS: Record<Range, Bucket[]> = {
 }
 
 export function HistoryScreen() {
+  const { tokens } = useTheme()
+  const selectedBar = [tokens.accentText, tokens.accent] as const
   const [range, setRange] = useState<Range>('week')
   const [selectedIndex, setSelectedIndex] = useState(BUCKETS.week.length - 1)
 
@@ -187,12 +188,12 @@ export function HistoryScreen() {
     <View className="gap-6">
       <Header eyebrow="Deep analysis" title="Sleep history" />
 
-      <View className="rounded-[26px] border border-app-border/35 bg-app-panel p-5">
+      <View className="rounded-[26px] border border-app-line bg-app-panel p-5">
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="font-bold uppercase tracking-[.14em] text-white/75">
+          <Text className="font-bold uppercase tracking-[.14em] text-app-ink">
             {RANGES[range].title}
           </Text>
-          <View className="flex-row rounded-full border border-app-border/40 bg-white/5 p-1">
+          <View className="flex-row rounded-full border border-app-line bg-app-surface p-1">
             {RANGE_KEYS.map((key) => {
               const selectedRange = range === key
               return (
@@ -202,7 +203,7 @@ export function HistoryScreen() {
                   accessibilityLabel={`Show ${RANGES[key].label}`}
                   accessibilityState={{ selected: selectedRange }}
                   onPress={() => selectRange(key)}
-                  className={`rounded-full px-3 py-1.5 ${selectedRange ? 'bg-app-orchid' : ''}`}
+                  className={`rounded-full px-3 py-1.5 ${selectedRange ? 'bg-app-accent-strong' : ''}`}
                 >
                   <Text
                     className={`text-xs font-medium ${selectedRange ? 'text-white' : 'text-app-muted'}`}
@@ -228,7 +229,7 @@ export function HistoryScreen() {
             {GRID_HOURS.map((hour) => (
               <Text
                 key={hour}
-                className="absolute right-1.5 text-[10px] text-white/45"
+                className="absolute right-1.5 text-[10px] text-app-faint"
                 style={{
                   top: `${((CHART_MAX_HOURS - hour) / CHART_MAX_HOURS) * 100}%`,
                   transform: [{ translateY: -6 }],
@@ -244,11 +245,11 @@ export function HistoryScreen() {
               {GRID_HOURS.map((hour) => (
                 <View
                   key={hour}
-                  className="absolute inset-x-0 h-px bg-white/10"
+                  className="absolute inset-x-0 h-px bg-app-line"
                   style={{ top: `${((CHART_MAX_HOURS - hour) / CHART_MAX_HOURS) * 100}%` }}
                 />
               ))}
-              <View className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
+              <View className="absolute inset-x-0 bottom-0 h-px bg-app-line" />
 
               <View
                 className={`absolute inset-0 flex-row items-end ${
@@ -273,7 +274,7 @@ export function HistoryScreen() {
                       {showValue ? (
                         <Text
                           numberOfLines={1}
-                          className="absolute text-center text-[9px] text-white/70"
+                          className="absolute text-center text-[9px] text-app-muted"
                           style={{
                             bottom: `${Math.min(barPercent, 92)}%`,
                             width: DAY_LABEL_WIDTH,
@@ -286,7 +287,7 @@ export function HistoryScreen() {
                         </Text>
                       ) : null}
                       <LinearGradient
-                        colors={isSelected ? SELECTED_BAR : colors.barGradient}
+                        colors={isSelected ? selectedBar : tokens.barGradient}
                         start={{ x: 0.5, y: 1 }}
                         end={{ x: 0.5, y: 0 }}
                         style={{
@@ -307,14 +308,14 @@ export function HistoryScreen() {
                   <View key={bucket.id} className="flex-1 items-center">
                     <Text
                       className={`text-[9px] ${
-                        index === activeIndex ? 'text-app-lilac' : 'text-white/40'
+                        index === activeIndex ? 'text-app-lilac' : 'text-app-faint'
                       }`}
                     >
                       {bucket.weekday}
                     </Text>
                     <Text
                       className={`text-[9px] ${
-                        index === activeIndex ? 'text-app-lilac' : 'text-white/40'
+                        index === activeIndex ? 'text-app-lilac' : 'text-app-faint'
                       }`}
                     >
                       {SHORT_DATE.format(RANGE_NIGHTS.week[index].date).split(' ')[1]}
@@ -325,7 +326,7 @@ export function HistoryScreen() {
             ) : (
               <View className="mt-2 flex-row justify-between">
                 {axisLabels.map((bucket, index) => (
-                  <Text key={`${bucket.id}-${index}`} className="text-[10px] text-white/40">
+                  <Text key={`${bucket.id}-${index}`} className="text-[10px] text-app-faint">
                     {bucket.axis}
                   </Text>
                 ))}
@@ -334,7 +335,7 @@ export function HistoryScreen() {
           </View>
         </View>
 
-        <View className="mt-5 flex-row items-center justify-between border-t border-white/10 pt-4">
+        <View className="mt-5 flex-row items-center justify-between border-t border-app-line pt-4">
           <View>
             <Text className="text-xs text-app-muted">Average sleep</Text>
             <Text variant="display" className="mt-1 text-lg font-bold text-app-ink">
@@ -343,14 +344,14 @@ export function HistoryScreen() {
           </View>
           <View className="items-end">
             <Text className="text-xs text-app-muted">Best night</Text>
-            <Text variant="display" className="mt-1 text-lg font-bold text-[#49e2ae]">
+            <Text variant="display" className="mt-1 text-lg font-bold text-app-mint">
               {formatDuration(bestHours)}
             </Text>
           </View>
         </View>
       </View>
 
-      <View className="rounded-[24px] border border-app-border/35 bg-app-card p-5">
+      <View className="rounded-[24px] border border-app-line bg-app-card p-5">
         <View className="flex-row items-center justify-between">
           <View className="flex-1">
             <Text className="text-[10px] font-bold uppercase tracking-[.16em] text-app-muted">
@@ -366,9 +367,9 @@ export function HistoryScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={isWeekly ? 'Jump to this week' : 'Jump to today'}
                 onPress={() => setSelectedIndex(buckets.length - 1)}
-                className="rounded-full bg-white/10 px-3 py-1.5"
+                className="rounded-full bg-app-surface-strong px-3 py-1.5"
               >
-                <Text className="text-xs font-medium text-white">
+                <Text className="text-xs font-medium text-app-ink">
                   {isWeekly ? 'This week' : 'Today'}
                 </Text>
               </Pressable>
@@ -379,11 +380,11 @@ export function HistoryScreen() {
               accessibilityState={{ disabled: activeIndex === 0 }}
               disabled={activeIndex === 0}
               onPress={() => setSelectedIndex((index) => Math.max(0, index - 1))}
-              className={`h-9 w-9 items-center justify-center rounded-full border border-white/10 ${
+              className={`h-9 w-9 items-center justify-center rounded-full border border-app-line ${
                 activeIndex === 0 ? 'opacity-30' : ''
               }`}
             >
-              <ChevronLeft size={17} color={colors.ink} />
+              <ChevronLeft size={17} color={tokens.ink} />
             </Pressable>
             <Pressable
               accessibilityRole="button"
@@ -391,11 +392,11 @@ export function HistoryScreen() {
               accessibilityState={{ disabled: activeIndex === buckets.length - 1 }}
               disabled={activeIndex === buckets.length - 1}
               onPress={() => setSelectedIndex((index) => Math.min(buckets.length - 1, index + 1))}
-              className={`h-9 w-9 items-center justify-center rounded-full border border-white/10 ${
+              className={`h-9 w-9 items-center justify-center rounded-full border border-app-line ${
                 activeIndex === buckets.length - 1 ? 'opacity-30' : ''
               }`}
             >
-              <ChevronRight size={17} color={colors.ink} />
+              <ChevronRight size={17} color={tokens.ink} />
             </Pressable>
           </View>
         </View>
@@ -414,7 +415,7 @@ export function HistoryScreen() {
             <Text className="text-xs text-app-muted">
               {selected.count > 1 ? 'Avg score' : 'Sleep score'}
             </Text>
-            <Text variant="display" className="mt-1 text-xl font-bold text-[#49e2ae]">
+            <Text variant="display" className="mt-1 text-xl font-bold text-app-mint">
               {selected.score}%
             </Text>
           </View>
@@ -436,20 +437,20 @@ export function HistoryScreen() {
               onPress={() => selectNight(night)}
               className={`flex-row items-center gap-4 rounded-[24px] border p-5 ${
                 isSelected
-                  ? 'border-app-violet/60 bg-app-card'
-                  : 'border-app-border/35 bg-app-panel'
+                  ? 'border-app-accent-line bg-app-card'
+                  : 'border-app-line bg-app-panel'
               }`}
             >
-              <View className="h-12 w-12 items-center justify-center rounded-full bg-[#3c2370]">
-                <Moon size={21} color={colors.lilac} />
+              <View className="h-12 w-12 items-center justify-center rounded-full bg-app-accent-deep">
+                <Moon size={21} color={tokens.accentText} />
               </View>
               <View>
                 <Text className="font-semibold text-app-ink">{DAY_LABEL.format(night.date)}</Text>
-                <Text className="mt-1 text-sm text-white/55">
+                <Text className="mt-1 text-sm text-app-muted">
                   {night.bedtime} – {night.wake} · {formatDuration(night.hours)}
                 </Text>
               </View>
-              <Text variant="display" className="ml-auto text-2xl font-bold text-[#49e2ae]">
+              <Text variant="display" className="ml-auto text-2xl font-bold text-app-mint">
                 {night.score}%
               </Text>
             </Pressable>

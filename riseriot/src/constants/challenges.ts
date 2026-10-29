@@ -1,17 +1,39 @@
-import { Keyboard, Watch, Zap, type LucideIcon } from 'lucide-react-native'
+import { Camera, Vibrate, Zap, type LucideIcon } from 'lucide-react-native'
 
-import type { ChallengeId } from '../store/alarms'
+export const CHALLENGE_IDS = ['math', 'shake', 'camera'] as const
+
+export type ChallengeId = (typeof CHALLENGE_IDS)[number]
+
+export function isChallengeId(value: unknown): value is ChallengeId {
+  return typeof value === 'string' && (CHALLENGE_IDS as readonly string[]).includes(value)
+}
 
 export type Challenge = {
   id: ChallengeId
   label: string
+  description: string
   Icon: LucideIcon
 }
 
 export const CHALLENGES: Challenge[] = [
-  { id: 'math', label: 'Math challenge', Icon: Zap },
-  { id: 'shake', label: 'Shake it off', Icon: Watch },
-  { id: 'typing', label: 'Type to stop', Icon: Keyboard },
+  {
+    id: 'math',
+    label: 'Math challenge',
+    description: 'Solve one quick sum to stop the alarm.',
+    Icon: Zap,
+  },
+  {
+    id: 'shake',
+    label: 'Shake for 5s',
+    description: 'Keep shaking the phone for five seconds.',
+    Icon: Vibrate,
+  },
+  {
+    id: 'camera',
+    label: 'Camera + move 5s',
+    description: 'Watch yourself wake up: camera on and move for five seconds.',
+    Icon: Camera,
+  },
 ]
 
 export function getChallenge(id: ChallengeId) {

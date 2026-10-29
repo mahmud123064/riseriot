@@ -80,6 +80,17 @@ async function ensureChannel() {
   })
 }
 
+/** Checks the notification permission without prompting. */
+export async function getNotificationPermission() {
+  if (!Notifications) return false
+  try {
+    const current = await Notifications.getPermissionsAsync()
+    return current.granted
+  } catch {
+    return false
+  }
+}
+
 /** Prompts once (the OS only shows the dialog the first time). */
 export async function ensureNotificationPermission() {
   if (!Notifications) return false

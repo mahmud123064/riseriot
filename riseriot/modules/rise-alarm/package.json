@@ -1,0 +1,6 @@
+{
+  "name": "rise-alarm",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Expo module that schedules exact, full-screen alarm notifications on Android."
+}
