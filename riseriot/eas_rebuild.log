@@ -1,0 +1,12 @@
+Resolved "development" environment for the build. Learn more: https://docs.expo.dev/eas/environment-variables/#setting-the-environment-for-your-builds
+No environment variables with visibility "Plain text" and "Sensitive" found for the "development" environment on EAS.
+
+
+
+✔ Using remote Android credentials (Expo server)
+✔ Using Keystore from configuration: Build Credentials 0g8z6LibSU (default)
+
+Compressing project files and uploading to EAS Build. Learn more: https://expo.fyi/eas-build-archive
+- Compressing project files
+Your project archive is 355 MB. You can reduce its size and the time it takes to upload by excluding files that are unnecessary for the build process in .easignore file. Learn more: https://expo.fyi/eas-build-archive
+- Uploading to EAS Build (0 / 355 MB)

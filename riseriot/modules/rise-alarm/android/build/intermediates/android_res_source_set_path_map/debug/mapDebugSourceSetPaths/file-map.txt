@@ -1,0 +1,9 @@
+expo.modules.risealarm.rise-alarm-pngs-0 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\generated\res\pngs\debug
+expo.modules.risealarm.rise-alarm-updated_navigation_xml-1 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\generated\updated_navigation_xml\debug
+expo.modules.risealarm.rise-alarm-mergeDebugResources-2 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+expo.modules.risealarm.rise-alarm-mergeDebugResources-3 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+expo.modules.risealarm.rise-alarm-debug-4 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\intermediates\merged_res\debug\mergeDebugResources
+expo.modules.risealarm.rise-alarm-debug-5 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\build\intermediates\packaged_res\debug\packageDebugResources
+expo.modules.risealarm.rise-alarm-debug-6 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\debug\res
+expo.modules.risealarm.rise-alarm-main-7 E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\res
+gradleHome-0 C:\Users\MAHMUD\.gradle

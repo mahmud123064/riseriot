@@ -1,0 +1,63 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="expo.modules.risealarm" >
+4
+5    <uses-sdk android:minSdkVersion="24" />
+5-->INJECTED
+5-->INJECTED
+6
+7    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+7-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:2:3-77
+7-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:2:20-74
+8    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+8-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:3:3-72
+8-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:3:20-69
+9    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+9-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:4:3-79
+9-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:4:20-76
+10    <uses-permission android:name="android.permission.VIBRATE" />
+10-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:5:3-64
+10-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:5:20-61
+11    <uses-permission android:name="android.permission.WAKE_LOCK" />
+11-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:6:3-66
+11-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:6:20-63
+12    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+12-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:7:3-79
+12-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:7:20-76
+13
+14    <application>
+14-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:9:3-25:17
+15        <receiver
+15-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:10:5-12:34
+16            android:name="expo.modules.risealarm.AlarmReceiver"
+16-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:11:7-36
+17            android:exported="false" />
+17-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:12:7-31
+18        <receiver
+18-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:14:5-24:16
+19            android:name="expo.modules.risealarm.BootReceiver"
+19-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:15:7-35
+20            android:exported="true" >
+20-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:16:7-30
+21            <intent-filter>
+21-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:17:7-23:23
+22                <action android:name="android.intent.action.BOOT_COMPLETED" />
+22-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:18:9-71
+22-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:18:17-68
+23                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+23-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:19:9-76
+23-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:19:17-73
+24                <action android:name="android.intent.action.TIME_SET" />
+24-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:20:9-65
+24-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:20:17-62
+25                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+25-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:21:9-73
+25-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:21:17-70
+26                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
+26-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:22:9-99
+26-->E:\Mobile_app\RiseRiot_app\RiseRiot\modules\rise-alarm\android\src\main\AndroidManifest.xml:22:17-96
+27            </intent-filter>
+28        </receiver>
+29    </application>
+30
+31</manifest>

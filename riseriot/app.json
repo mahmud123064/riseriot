@@ -19,7 +19,20 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.CAMERA",
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        "android.permission.USE_EXACT_ALARM",
+        "android.permission.USE_FULL_SCREEN_INTENT",
+        "android.permission.VIBRATE",
+        "android.permission.WAKE_LOCK",
+        "android.permission.RECEIVE_BOOT_COMPLETED"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -53,6 +66,11 @@
       "expo-asset",
       "expo-sqlite",
       "./modules/rise-alarm/app.plugin.js"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "13bd07b2-00df-4f86-bbea-8e247e790dac"
+      }
+    }
   }
 }
