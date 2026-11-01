@@ -31,7 +31,7 @@ export const CHALLENGES: Challenge[] = [
   {
     id: 'camera',
     label: 'Camera + move 5s',
-    description: 'Watch yourself wake up: camera on and move for five seconds.',
+    description: 'Move the phone for five seconds while the camera is on.',
     Icon: Camera,
   },
 ]

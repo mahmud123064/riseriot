@@ -1,5 +1,39 @@
 @AGENTS.md
 
+## Architecture & code map
+
+No navigation library — the app is a single hand-rolled tab switcher. This overrides the "use
+Expo Router" note in `AGENTS.md`: there is no `src/app/` and no router.
+
+- `App.tsx` — boot: fonts → splash → `LoadingScreen` (😊 "Please wait…") → open DB / load state →
+  reschedule alarms → `RiseRiotApp`. Mounts `ThemeProvider`, `AdhanSound`, `AlarmGate`.
+- `src/RiseRiotApp.tsx` — tab state + `BottomNav`; renders one screen at a time (Home, History,
+  Stopwatch, Settings, Alarms).
+- `src/screens/` — one file per tab, plus sub-screens (`PrayerTimesScreen`, `AlarmSoundScreen`).
+- `src/components/` — shared UI (`Text`, `Toggle`, `Wheel`, `Header`, `BottomNav`, `AlarmGate`,
+  `Celebration`, `LoadingScreen`) and the wake-up challenges under `challenges/`.
+- `src/store/` — hand-rolled stores (module singleton + `useSyncExternalStore`): `alarms`,
+  `prayers`, `preferences`, `stopwatchHistory`, `theme`, `activeAlarm`.
+- `src/db/` — SQLite (`expo-sqlite`, WAL + `PRAGMA user_version` migrations). `alarms` and
+  `alarm_history` are real tables; prayers/preferences/stopwatch/theme are JSON blobs in
+  `app_settings`.
+- `src/theme/` — NativeWind theming; the `app.*` Tailwind colors resolve to CSS variables set at
+  runtime by `ThemeProvider` (light/dark/system mode + accent color).
+- `src/utils/alarms.ts` — time/day formatting plus `getNextAlarm` / `nextAlarmOccurrence`, the JS
+  mirror of the native next-trigger math used by the Home hero card.
+- `modules/rise-alarm/` — local Android native module (Kotlin) that actually fires alarms. JS talks
+  to it through `src/alarmScheduler.ts` (best-effort; resolves to `null` on iOS/web/Expo Go).
+
+Two event flows:
+
+1. **Alarms** — JS stores specs → `alarmScheduler.ts` → native `AlarmScheduler` (rolling
+   `setAlarmClock`) → `AlarmReceiver` posts a full-screen notification and emits `onAlarmFired` →
+   `AlarmGate` records history, plays the chosen sound, and shows the challenge. A one-time alarm
+   (no repeat days) is removed from the list once dismissed; recurring alarms stay.
+2. **Adhan / prayer** — `src/notifications.ts` (expo-notifications, loaded defensively) schedules a
+   daily repeating notification per enabled prayer; `AdhanSound` plays the full adhan in the
+   foreground.
+
 ## Local Android dev build (this Windows machine)
 
 Expo Go **cannot** run this app: `modules/rise-alarm` is a local native module, so testing requires a

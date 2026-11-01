@@ -1,3 +1,5 @@
+import type { Alarm } from '../store/alarms'
+
 const SHORT_DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] as const
 
 /** Two-letter initials for the day picker, indexed like `Date#getDay`. */
@@ -44,3 +46,50 @@ export function formatAlarmDays(days: number[]) {
   if (sameDays(sorted, WEEKEND)) return 'Weekends'
   return sorted.map((day) => SHORT_DAY_NAMES[day]).join(', ')
 }
+
+/**
+ * Next local-time occurrence of an alarm strictly after `now`. Mirrors the native
+ * `AlarmScheduler.nextTriggerMillis` so the home card matches what will actually ring.
+ * An empty `days` list means a one-time alarm (next occurrence only).
+ */
+export function nextAlarmOccurrence(
+  hour: number,
+  minute: number,
+  days: number[],
+  now: Date,
+): Date | null {
+  if (days.length === 0) {
+    const candidate = new Date(now)
+    candidate.setHours(hour, minute, 0, 0)
+    if (candidate.getTime() <= now.getTime()) candidate.setDate(candidate.getDate() + 1)
+    return candidate
+  }
+
+  for (let offset = 0; offset <= 7; offset += 1) {
+    const candidate = new Date(now)
+    candidate.setDate(candidate.getDate() + offset)
+    candidate.setHours(hour, minute, 0, 0)
+    if (candidate.getTime() > now.getTime() && days.includes(candidate.getDay())) {
+      return candidate
+    }
+  }
+  return null
+}
+
+/** The enabled alarm that will ring next, or null when none is set. */
+export function getNextAlarm(
+  alarms: Alarm[],
+  now = Date.now(),
+): { alarm: Alarm; occursAt: number } | null {
+  let best: { alarm: Alarm; occursAt: number } | null = null
+  for (const alarm of alarms) {
+    if (!alarm.enabled) continue
+    const occursAt = nextAlarmOccurrence(alarm.hour, alarm.minute, alarm.days, new Date(now))?.getTime()
+    if (occursAt == null) continue
+    if (best === null || occursAt < best.occursAt) {
+      best = { alarm, occursAt }
+    }
+  }
+  return best
+}
+

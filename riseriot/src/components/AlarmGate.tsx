@@ -1,5 +1,5 @@
 import { setAudioModeAsync, useAudioPlayer, type AudioPlayer } from 'expo-audio'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AppState } from 'react-native'
 
 import {
@@ -16,6 +16,8 @@ import {
   setActiveAlarm,
   useActiveAlarm,
 } from '../store/activeAlarm'
+import { getAlarms, removeAlarm } from '../store/alarms'
+import { Celebration } from './Celebration'
 import { ChallengeRunner } from './challenges/ChallengeRunner'
 
 /**
@@ -39,6 +41,7 @@ export function AlarmGate() {
   const player = useAudioPlayer()
   const historyPromise = useRef<Promise<string> | null>(null)
   const lastHandled = useRef<string | null>(null)
+  const [celebrated, setCelebrated] = useState(false)
 
   const startRinging = useCallback(async () => {
     const current = getActiveAlarm()
@@ -117,7 +120,8 @@ export function AlarmGate() {
   }, [active, player])
 
   function close(dismissedWith: 'completed' | 'skipped') {
-    if (!getActiveAlarm()) return
+    const current = getActiveAlarm()
+    if (!current) return
 
     try {
       player.pause()
@@ -127,6 +131,16 @@ export function AlarmGate() {
 
     setActiveAlarm(null)
     void dismissAlarm()
+
+    // A one-time alarm (no repeat days) is finished once it has been turned off.
+    const fired = getAlarms().find((alarm) => alarm.id === current.id)
+    if (fired && fired.days.length === 0) {
+      removeAlarm(fired.id)
+    }
+
+    if (dismissedWith === 'completed') {
+      setCelebrated(true)
+    }
 
     const pending = historyPromise.current
     historyPromise.current = null
@@ -138,10 +152,13 @@ export function AlarmGate() {
   }
 
   return (
-    <ChallengeRunner
-      challenge={active?.challenge ?? null}
-      onClose={() => close('completed')}
-      onSkip={() => close('skipped')}
-    />
+    <>
+      <ChallengeRunner
+        challenge={active?.challenge ?? null}
+        onClose={() => close('completed')}
+        onSkip={() => close('skipped')}
+      />
+      <Celebration visible={celebrated} onClose={() => setCelebrated(false)} />
+    </>
   )
 }

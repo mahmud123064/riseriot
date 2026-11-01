@@ -1,6 +1,6 @@
 import { useCameraPermissions, CameraView } from 'expo-camera'
 import { Accelerometer } from 'expo-sensors'
-import { useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
 
@@ -17,6 +17,48 @@ const RING_SIZE = 150
 const RING_STROKE = 12
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
+
+type CameraPermission = ReturnType<typeof useCameraPermissions>[0]
+
+/**
+ * Isolated so the accelerometer-driven progress updates never re-render the
+ * native camera view (a re-render every ~80 ms made the preview stutter).
+ */
+const CameraPreview = memo(function CameraPreview({
+  permission,
+  onRequestPermission,
+}: {
+  permission: CameraPermission
+  onRequestPermission: () => void
+}) {
+  return (
+    <View className="h-64 w-full overflow-hidden rounded-[26px] border border-app-line bg-app-surface">
+      {permission?.granted ? (
+        <CameraView facing="front" style={{ flex: 1 }} />
+      ) : (
+        <View className="flex-1 items-center justify-center gap-3 px-6">
+          <Text className="text-center text-sm text-app-muted">
+            {permission === null
+              ? 'Checking camera permission…'
+              : permission.canAskAgain
+                ? 'The camera turns on so you can see yourself wake up.'
+                : 'Camera access is off. Enable it for RiseRiot in system settings.'}
+          </Text>
+          {permission && !permission.granted && permission.canAskAgain ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Allow camera access"
+              onPress={onRequestPermission}
+              className="rounded-full bg-app-accent-strong px-5 py-2.5"
+            >
+              <Text className="text-sm font-bold text-white">Allow camera</Text>
+            </Pressable>
+          ) : null}
+        </View>
+      )}
+    </View>
+  )
+})
 
 export function MovementChallenge({
   challenge,
@@ -35,6 +77,11 @@ export function MovementChallenge({
   const lastSample = useRef<number | null>(null)
   const completed = useRef(false)
   const onCompleteRef = useRef(onComplete)
+
+  // Stable identity so the memoized preview stays mounted across progress ticks.
+  const requestCamera = useCallback(() => {
+    void requestPermission()
+  }, [requestPermission])
 
   useEffect(() => {
     onCompleteRef.current = onComplete
@@ -92,31 +139,7 @@ export function MovementChallenge({
   return (
     <View className="items-center gap-6">
       {isCamera ? (
-        <View className="h-64 w-full overflow-hidden rounded-[26px] border border-app-line bg-app-surface">
-          {permission?.granted ? (
-            <CameraView facing="front" style={{ flex: 1 }} />
-          ) : (
-            <View className="flex-1 items-center justify-center gap-3 px-6">
-              <Text className="text-center text-sm text-app-muted">
-                {permission === null
-                  ? 'Checking camera permission…'
-                  : permission.canAskAgain
-                    ? 'The camera turns on so you can see yourself wake up.'
-                    : 'Camera access is off. Enable it for RiseRiot in system settings.'}
-              </Text>
-              {permission && !permission.granted && permission.canAskAgain ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Allow camera access"
-                  onPress={() => void requestPermission()}
-                  className="rounded-full bg-app-accent-strong px-5 py-2.5"
-                >
-                  <Text className="text-sm font-bold text-white">Allow camera</Text>
-                </Pressable>
-              ) : null}
-            </View>
-          )}
-        </View>
+        <CameraPreview permission={permission} onRequestPermission={requestCamera} />
       ) : null}
 
       <View className="items-center justify-center">
@@ -158,7 +181,7 @@ export function MovementChallenge({
 
       <View className="items-center gap-1">
         <Text className="text-center font-medium text-app-ink">
-          {isCamera ? 'Move around in front of the camera' : 'Shake the phone'}
+          {isCamera ? 'Move the phone' : 'Shake the phone'}
         </Text>
         <Text className="text-center text-sm text-app-muted">
           Keep it up for five seconds to stop the alarm.
