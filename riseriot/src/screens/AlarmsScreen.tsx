@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, Trash2 } from 'lucide-react-native'
+import { ChevronRight, Pencil, Plus, Trash2 } from 'lucide-react-native'
 import { useMemo, useState, useSyncExternalStore } from 'react'
 import { Pressable, View } from 'react-native'
 
@@ -15,6 +15,8 @@ import {
   removeAlarm,
   subscribeAlarms,
   toggleAlarm,
+  updateAlarm,
+  type Alarm,
   type AlarmInput,
   type ChallengeId,
 } from '../store/alarms'
@@ -25,6 +27,7 @@ export function AlarmsScreen() {
   const alarms = useSyncExternalStore(subscribeAlarms, getAlarms)
   const { tokens } = useTheme()
   const [formOpen, setFormOpen] = useState(false)
+  const [editingAlarm, setEditingAlarm] = useState<Alarm | null>(null)
   const [pendingDelete, setPendingDelete] = useState<string | null>(null)
   const [runningChallenge, setRunningChallenge] = useState<ChallengeId | null>(null)
 
@@ -34,9 +37,24 @@ export function AlarmsScreen() {
     [alarms],
   )
 
-  function handleSave(alarm: AlarmInput) {
-    addAlarm(alarm)
+  function handleSave(alarm: AlarmInput, id?: string) {
+    if (id) {
+      updateAlarm(id, alarm)
+    } else {
+      addAlarm(alarm)
+    }
+    setEditingAlarm(null)
     setPendingDelete(null)
+  }
+
+  function handleOpenNew() {
+    setEditingAlarm(null)
+    setFormOpen(true)
+  }
+
+  function handleOpenEdit(alarm: Alarm) {
+    setEditingAlarm(alarm)
+    setFormOpen(true)
   }
 
   return (
@@ -46,7 +64,7 @@ export function AlarmsScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add a new alarm"
-          onPress={() => setFormOpen(true)}
+          onPress={handleOpenNew}
           className="flex-row items-center gap-2 rounded-full bg-app-accent-strong px-4 py-3"
         >
           <Plus size={18} color="#fff" />
@@ -62,7 +80,7 @@ export function AlarmsScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            onPress={() => setFormOpen(true)}
+            onPress={handleOpenNew}
             className="mt-3 rounded-full bg-app-accent-strong px-5 py-2.5"
           >
             <Text className="text-sm font-bold text-white">Add alarm</Text>
@@ -81,7 +99,12 @@ export function AlarmsScreen() {
                 className="rounded-[24px] border border-app-line bg-app-card p-5"
               >
                 <View className="flex-row items-center justify-between">
-                  <View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Edit ${time} ${meridiem} alarm`}
+                    onPress={() => handleOpenEdit(alarm)}
+                    className="flex-1"
+                  >
                     <Text
                       variant="display"
                       className={`text-5xl font-bold tracking-[-.06em] ${
@@ -101,7 +124,7 @@ export function AlarmsScreen() {
                     <Text className="mt-2 text-sm text-app-muted">
                       {formatAlarmDays(alarm.days)}
                     </Text>
-                  </View>
+                  </Pressable>
                   <Toggle active={alarm.enabled} onClick={() => toggleAlarm(alarm.id)} />
                 </View>
 
@@ -148,10 +171,19 @@ export function AlarmsScreen() {
                       </Pressable>
                       <Pressable
                         accessibilityRole="button"
+                        accessibilityLabel={`Edit ${time} ${meridiem} alarm`}
+                        hitSlop={8}
+                        onPress={() => handleOpenEdit(alarm)}
+                        className="h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
+                      >
+                        <Pencil size={15} color={tokens.muted} />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
                         accessibilityLabel={`Delete ${time} ${meridiem} alarm`}
                         hitSlop={8}
                         onPress={() => setPendingDelete(alarm.id)}
-                        className="ml-auto h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
+                        className="h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
                       >
                         <Trash2 size={16} color={tokens.dangerInk} />
                       </Pressable>
@@ -164,7 +196,15 @@ export function AlarmsScreen() {
         </View>
       )}
 
-      <AlarmForm visible={formOpen} onClose={() => setFormOpen(false)} onSave={handleSave} />
+      <AlarmForm
+        visible={formOpen}
+        alarmToEdit={editingAlarm}
+        onClose={() => {
+          setFormOpen(false)
+          setEditingAlarm(null)
+        }}
+        onSave={handleSave}
+      />
       <ChallengeRunner
         challenge={runningChallenge}
         onClose={() => setRunningChallenge(null)}

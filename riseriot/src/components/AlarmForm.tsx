@@ -4,7 +4,7 @@ import { Modal, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { CHALLENGES } from '../constants/challenges'
-import type { AlarmInput, ChallengeId } from '../store/alarms'
+import type { Alarm, AlarmInput, ChallengeId } from '../store/alarms'
 import { getPreferences } from '../store/preferences'
 import { useTheme } from '../theme/ThemeProvider'
 import { DAY_LABELS, DAY_NAMES, DAY_PRESETS, formatAlarmDays } from '../utils/alarms'
@@ -19,11 +19,12 @@ const formatMinute = (value: number) => String(value).padStart(2, '0')
 
 type AlarmFormProps = {
   visible: boolean
+  alarmToEdit?: Alarm | null
   onClose: () => void
-  onSave: (alarm: AlarmInput) => void
+  onSave: (alarm: AlarmInput, id?: string) => void
 }
 
-export function AlarmForm({ visible, onClose, onSave }: AlarmFormProps) {
+export function AlarmForm({ visible, alarmToEdit, onClose, onSave }: AlarmFormProps) {
   return (
     <Modal
       visible={visible}
@@ -32,21 +33,30 @@ export function AlarmForm({ visible, onClose, onSave }: AlarmFormProps) {
       statusBarTranslucent
       onRequestClose={onClose}
     >
-      {/* Mounted only while open, so every sheet starts from a clean 7:00 AM alarm. */}
-      {visible ? <AlarmSheet onClose={onClose} onSave={onSave} /> : null}
+      {/* Mounted only while open, so every sheet starts fresh or with alarmToEdit. */}
+      {visible ? (
+        <AlarmSheet alarmToEdit={alarmToEdit} onClose={onClose} onSave={onSave} />
+      ) : null}
     </Modal>
   )
 }
 
-function AlarmSheet({ onClose, onSave }: Omit<AlarmFormProps, 'visible'>) {
+function AlarmSheet({
+  alarmToEdit,
+  onClose,
+  onSave,
+}: Omit<AlarmFormProps, 'visible'>) {
   const insets = useSafeAreaInsets()
   const { tokens } = useTheme()
-  const [hour24, setHour24] = useState(7)
-  const [minute, setMinute] = useState(0)
-  const [days, setDays] = useState<number[]>([])
-  const [challenge, setChallenge] = useState<ChallengeId>('math')
-  // The sheet mounts fresh on each open, so read the saved default at that moment.
-  const [soundId, setSoundId] = useState(() => getPreferences().defaultSoundId)
+  const isEditing = Boolean(alarmToEdit)
+  const [hour24, setHour24] = useState(() => alarmToEdit?.hour ?? 7)
+  const [minute, setMinute] = useState(() => alarmToEdit?.minute ?? 0)
+  const [days, setDays] = useState<number[]>(() => alarmToEdit?.days ?? [])
+  const [challenge, setChallenge] = useState<ChallengeId>(() => alarmToEdit?.challenge ?? 'math')
+  // The sheet mounts fresh on each open, so read either the alarm's sound or the saved default.
+  const [soundId, setSoundId] = useState(
+    () => alarmToEdit?.soundId ?? getPreferences().defaultSoundId,
+  )
 
   const hour12 = hour24 % 12 === 0 ? 12 : hour24 % 12
   const meridiem = hour24 < 12 ? 'AM' : 'PM'
@@ -73,7 +83,17 @@ function AlarmSheet({ onClose, onSave }: Omit<AlarmFormProps, 'visible'>) {
   }
 
   function save() {
-    onSave({ hour: hour24, minute, days, challenge, soundId, enabled: true })
+    onSave(
+      {
+        hour: hour24,
+        minute,
+        days,
+        challenge,
+        soundId,
+        enabled: alarmToEdit?.enabled ?? true,
+      },
+      alarmToEdit?.id,
+    )
     onClose()
   }
 
@@ -81,7 +101,7 @@ function AlarmSheet({ onClose, onSave }: Omit<AlarmFormProps, 'visible'>) {
     <View className="flex-1 justify-end bg-app-scrim">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Close new alarm"
+        accessibilityLabel={isEditing ? 'Close edit alarm' : 'Close new alarm'}
         className="absolute inset-0"
         onPress={onClose}
       />
@@ -99,12 +119,12 @@ function AlarmSheet({ onClose, onSave }: Omit<AlarmFormProps, 'visible'>) {
               Alarm
             </Text>
             <Text variant="display" className="mt-1 text-2xl font-bold text-app-ink">
-              New alarm
+              {isEditing ? 'Edit alarm' : 'New alarm'}
             </Text>
           </View>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Close new alarm"
+            accessibilityLabel={isEditing ? 'Close edit alarm' : 'Close new alarm'}
             hitSlop={8}
             onPress={onClose}
             className="h-9 w-9 items-center justify-center rounded-full border border-app-line bg-app-surface"
@@ -295,11 +315,13 @@ function AlarmSheet({ onClose, onSave }: Omit<AlarmFormProps, 'visible'>) {
 
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Save alarm"
+          accessibilityLabel={isEditing ? 'Save changes' : 'Save alarm'}
           onPress={save}
           className="mt-1 items-center rounded-2xl bg-app-accent-strong py-4"
         >
-          <Text className="text-sm font-bold text-white">Save alarm</Text>
+          <Text className="text-sm font-bold text-white">
+            {isEditing ? 'Save changes' : 'Save alarm'}
+          </Text>
         </Pressable>
       </View>
     </View>

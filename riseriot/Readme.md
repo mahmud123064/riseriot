@@ -110,4 +110,4 @@ If something breaks
 │ Port 8081 already in use              │ An old Metro is alive on ::1 → kill it, keep the new one                           │
 └───────────────────────────────────────┴────────────────────────────────────────────────────────────────────────────────────┘
 
-The full build recipe is also in CLAUDE.md now, so a future session doesn't have to rediscover it. Want me to add this day-to-day loop (sections A and B) there too?
+The full build recipe is also in CLAUDE.md now, so a future session doesn't have to rediscover it.

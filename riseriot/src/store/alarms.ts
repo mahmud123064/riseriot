@@ -9,6 +9,7 @@ import {
   seedAlarms,
 } from '../db/alarms'
 import { getSetting } from '../db/settings'
+import { nextAlarmOccurrence } from '../utils/alarms'
 
 export type { ChallengeId } from '../constants/challenges'
 
@@ -24,6 +25,7 @@ export type Alarm = {
   /** Id from `src/constants/alarmSounds.ts`. */
   soundId: string
   enabled: boolean
+  createdAt?: number
 }
 
 export type AlarmInput = Omit<Alarm, 'id'>
@@ -85,7 +87,22 @@ export async function loadAlarms() {
       await seedAlarms(INITIAL_ALARMS)
       return
     }
-    publish(saved)
+
+    // Auto-disable one-time alarms that have already passed while the app was closed.
+    const now = new Date()
+    const cleaned = saved.map((alarm) => {
+      if (alarm.enabled && alarm.days.length === 0 && alarm.createdAt) {
+        const next = nextAlarmOccurrence(alarm.hour, alarm.minute, alarm.days, now, alarm.createdAt)
+        if (!next) {
+          const updated = { ...alarm, enabled: false }
+          void saveAlarmRow(updated)
+          return updated
+        }
+      }
+      return alarm
+    })
+
+    publish(cleaned)
   } catch {
     // SQLite unavailable: the in-memory defaults remain and the app still works.
   }
@@ -97,16 +114,46 @@ export function addAlarm(input: AlarmInput) {
     ...input,
     id: `alarm-${Date.now()}-${nextId}`,
     days: [...new Set(input.days)].sort((a, b) => a - b),
+    createdAt: Date.now(),
   }
   publish([...alarms, alarm])
   void saveAlarmRow(alarm)
   rescheduleAlarm(alarm)
 }
 
-export function toggleAlarm(id: string) {
+export function updateAlarm(id: string, input: AlarmInput) {
   const next = alarms.map((alarm) =>
-    alarm.id === id ? { ...alarm, enabled: !alarm.enabled } : alarm,
+    alarm.id === id
+      ? {
+          ...alarm,
+          ...input,
+          days: [...new Set(input.days)].sort((a, b) => a - b),
+          createdAt: Date.now(),
+        }
+      : alarm,
   )
+  publish(next)
+  const changed = next.find((alarm) => alarm.id === id)
+  if (changed) {
+    void saveAlarmRow(changed)
+    if (changed.enabled) {
+      rescheduleAlarm(changed)
+    } else {
+      cancelAlarm(changed.id)
+    }
+  }
+}
+
+export function toggleAlarm(id: string) {
+  const next = alarms.map((alarm) => {
+    if (alarm.id !== id) return alarm
+    const enabling = !alarm.enabled
+    return {
+      ...alarm,
+      enabled: enabling,
+      ...(enabling && alarm.days.length === 0 ? { createdAt: Date.now() } : {}),
+    }
+  })
   publish(next)
   const changed = next.find((alarm) => alarm.id === id)
   if (changed) {

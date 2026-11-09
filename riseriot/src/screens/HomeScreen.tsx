@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { Bell, ChevronRight, Flame, Heart, Moon, Sun, Sunset } from 'lucide-react-native'
-import { useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Pressable, View } from 'react-native'
 
 import { Text } from '../components/Text'
@@ -30,9 +30,16 @@ function formatCountdown(ms: number): string {
 export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
   const { tokens } = useTheme()
   const alarms = useSyncExternalStore(subscribeAlarms, getAlarms)
+  const [now, setNow] = useState(() => new Date())
 
-  // One shared "now" keeps the greeting, date and countdown consistent.
-  const now = new Date()
+  // Refresh every 10s so the countdown, greeting, and next alarm stay current.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setNow(new Date())
+    }, 10000)
+    return () => clearInterval(id)
+  }, [])
+
   const next = getNextAlarm(alarms, now.getTime())
 
   const { Icon, greeting, color } = PERIOD[getDayPeriod(now.getHours())]

@@ -81,16 +81,27 @@ export function AlarmGate() {
     }).catch(() => '')
   }, [])
 
-  // Cold start: the app may have been launched by the full-screen intent.
+  // Cold start and background wake-up: the app may have been opened from the full-screen intent.
   useEffect(() => {
     let cancelled = false
     void getLaunchAlarm().then((payload) => {
       if (!cancelled && payload) handleFired(payload)
     })
     const unsubscribe = subscribeAlarmFired(handleFired)
+
+    // Re-check for a launch alarm if returning to the foreground while asleep in the background.
+    const appStateSub = AppState.addEventListener('change', (state) => {
+      if (state === 'active' && !getActiveAlarm()) {
+        void getLaunchAlarm().then((payload) => {
+          if (!cancelled && payload) handleFired(payload)
+        })
+      }
+    })
+
     return () => {
       cancelled = true
       unsubscribe()
+      appStateSub.remove()
     }
   }, [handleFired])
 

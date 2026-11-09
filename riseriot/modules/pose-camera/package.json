@@ -1,0 +1,6 @@
+{
+  "name": "pose-camera",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local Expo module providing live CameraX preview with MediaPipe Pose Landmarker."
+}

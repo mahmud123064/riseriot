@@ -30,8 +30,8 @@ export const CHALLENGES: Challenge[] = [
   },
   {
     id: 'camera',
-    label: 'Camera + move 5s',
-    description: 'Move the phone for five seconds while the camera is on.',
+    label: 'Pose & move for 5s',
+    description: 'Move your body (push-ups, dance, exercises) in front of the camera.',
     Icon: Camera,
   },
 ]

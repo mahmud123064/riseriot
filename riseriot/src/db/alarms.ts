@@ -49,6 +49,7 @@ function toAlarm(row: AlarmRow): Alarm | null {
     // Rows saved before a sound was renamed or retired fall back to the default.
     soundId: isAlarmSoundId(row.sound_id) ? row.sound_id : DEFAULT_SOUND_ID,
     enabled: row.enabled === 1,
+    createdAt: row.created_at,
   }
 }
 
@@ -84,7 +85,7 @@ export function saveAlarmRow(alarm: Alarm): Promise<void> {
       alarm.challenge,
       alarm.soundId,
       alarm.enabled ? 1 : 0,
-      Date.now(),
+      alarm.createdAt ?? Date.now(),
     )
   })
 }
@@ -116,7 +117,7 @@ export async function seedAlarms(initial: Alarm[]): Promise<void> {
       alarm.challenge,
       alarm.soundId,
       alarm.enabled ? 1 : 0,
-      Date.now(),
+      alarm.createdAt ?? Date.now(),
     )
   }
   await setSetting(ALARMS_SEEDED_KEY, '1')

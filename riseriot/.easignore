@@ -1,0 +1,9 @@
+# EAS ignore file
+# Avoid uploading Windows junction node_modules to EAS Build
+node_modules/
+.expo/
+android/.gradle/
+android/app/build/
+android/build/
+build_local*.log
+build_log*.txt

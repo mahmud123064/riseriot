@@ -8,6 +8,7 @@ import { useTheme } from '../../theme/ThemeProvider'
 import { Text } from '../Text'
 import { MathChallenge } from './MathChallenge'
 import { MovementChallenge } from './MovementChallenge'
+import { PoseMovementChallenge } from './PoseMovementChallenge'
 
 type ChallengeRunnerProps = {
   /** Null keeps the modal closed. */
@@ -19,9 +20,8 @@ type ChallengeRunnerProps = {
 }
 
 /**
- * Full-screen wake-up challenge. This is currently opened from an alarm card so
- * the challenge can be tried out; the same component is what an alarm should
- * render when it actually fires.
+ * Full-screen wake-up challenge. This is opened from an alarm card to test
+ * or directly by AlarmGate when an alarm rings.
  */
 export function ChallengeRunner({ challenge, onClose, onSkip }: ChallengeRunnerProps) {
   const insets = useSafeAreaInsets()
@@ -37,7 +37,9 @@ export function ChallengeRunner({ challenge, onClose, onSkip }: ChallengeRunnerP
       statusBarTranslucent
       onRequestClose={handleSkip}
     >
-      {challenge && meta && Icon ? (
+      {challenge === 'camera' ? (
+        <PoseMovementChallenge onComplete={onClose} onSkip={handleSkip} />
+      ) : challenge && meta && Icon ? (
         <View
           className="flex-1 bg-app-bg px-5"
           style={{

@@ -57,8 +57,22 @@ export function nextAlarmOccurrence(
   minute: number,
   days: number[],
   now: Date,
+  createdAt?: number,
 ): Date | null {
   if (days.length === 0) {
+    if (createdAt) {
+      const scheduled = new Date(createdAt)
+      scheduled.setHours(hour, minute, 0, 0)
+      if (scheduled.getTime() <= createdAt) {
+        scheduled.setDate(scheduled.getDate() + 1)
+      }
+      // If the one-time scheduled time has already passed, it is consumed.
+      if (scheduled.getTime() <= now.getTime()) {
+        return null
+      }
+      return scheduled
+    }
+
     const candidate = new Date(now)
     candidate.setHours(hour, minute, 0, 0)
     if (candidate.getTime() <= now.getTime()) candidate.setDate(candidate.getDate() + 1)
@@ -84,7 +98,13 @@ export function getNextAlarm(
   let best: { alarm: Alarm; occursAt: number } | null = null
   for (const alarm of alarms) {
     if (!alarm.enabled) continue
-    const occursAt = nextAlarmOccurrence(alarm.hour, alarm.minute, alarm.days, new Date(now))?.getTime()
+    const occursAt = nextAlarmOccurrence(
+      alarm.hour,
+      alarm.minute,
+      alarm.days,
+      new Date(now),
+      alarm.createdAt,
+    )?.getTime()
     if (occursAt == null) continue
     if (best === null || occursAt < best.occursAt) {
       best = { alarm, occursAt }

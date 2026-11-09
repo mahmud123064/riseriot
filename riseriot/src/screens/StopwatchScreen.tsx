@@ -1,9 +1,17 @@
 import { Play, Timer, Trash2 } from 'lucide-react-native'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 
 import { Header } from '../components/Header'
 import { Text } from '../components/Text'
+import {
+  getStopwatchElapsed,
+  pauseStopwatch,
+  resetStopwatch,
+  setStopwatchNote,
+  startStopwatch,
+  useActiveStopwatch,
+} from '../store/activeStopwatch'
 import {
   addStopwatchSession,
   getStopwatchHistory,
@@ -27,32 +35,40 @@ function formatElapsed(ms: number) {
 
 export function StopwatchScreen() {
   const { tokens } = useTheme()
-  const [running, setRunning] = useState(false)
-  const [elapsed, setElapsed] = useState(0)
-  const [note, setNote] = useState('')
-  const elapsedRef = useRef(0)
+  const { running, note } = useActiveStopwatch()
+  const [elapsed, setElapsed] = useState(getStopwatchElapsed)
   const sessions = useSyncExternalStore(subscribeStopwatchHistory, getStopwatchHistory)
 
+  // Keep display synchronized with the store timer while running.
   useEffect(() => {
     if (!running) return
-    const startedAt = Date.now() - elapsedRef.current
+
     const id = setInterval(() => {
-      elapsedRef.current = Date.now() - startedAt
-      setElapsed(elapsedRef.current)
-    }, 200)
+      setElapsed(getStopwatchElapsed())
+    }, 100)
     return () => clearInterval(id)
   }, [running])
 
-  function reset() {
-    setRunning(false)
-    elapsedRef.current = 0
+  function toggleRunning() {
+    if (running) {
+      pauseStopwatch()
+      setElapsed(getStopwatchElapsed())
+    } else {
+      startStopwatch()
+      setElapsed(getStopwatchElapsed())
+    }
+  }
+
+  function handleReset() {
+    resetStopwatch()
     setElapsed(0)
   }
 
-  function save() {
-    if (elapsed <= 0) return
-    addStopwatchSession(elapsed, note)
-    setNote('')
+  function handleSave() {
+    const current = getStopwatchElapsed()
+    if (current <= 0) return
+    addStopwatchSession(current, note)
+    handleReset()
   }
 
   const status = running ? 'Running' : elapsed > 0 ? 'Paused' : 'Ready'
@@ -72,7 +88,7 @@ export function StopwatchScreen() {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={running ? 'Pause stopwatch' : 'Start stopwatch'}
-          onPress={() => setRunning(!running)}
+          onPress={toggleRunning}
           className="mt-10 h-16 w-16 items-center justify-center rounded-full bg-app-accent-strong"
         >
           {running ? (
@@ -106,12 +122,12 @@ export function StopwatchScreen() {
               <TextInput
                 accessibilityLabel="Note for this stopwatch time"
                 value={note}
-                onChangeText={setNote}
+                onChangeText={setStopwatchNote}
                 placeholder="e.g. Reading, Gym, Focus work"
                 placeholderTextColor={tokens.faint}
                 maxLength={60}
                 returnKeyType="done"
-                onSubmitEditing={save}
+                onSubmitEditing={handleSave}
                 className="rounded-2xl border border-app-line bg-app-surface px-4 py-3 text-sm text-app-ink"
                 style={{ fontFamily: fonts.body }}
               />
@@ -120,7 +136,7 @@ export function StopwatchScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Save this time to history"
-                onPress={save}
+                onPress={handleSave}
                 className="rounded-full bg-app-accent-strong px-4 py-2"
               >
                 <Text className="text-xs font-bold text-white">Save time</Text>
@@ -128,7 +144,7 @@ export function StopwatchScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Reset stopwatch"
-                onPress={reset}
+                onPress={handleReset}
                 className="rounded-full border border-app-line bg-app-surface px-4 py-2"
               >
                 <Text className="text-xs font-medium text-app-ink">Reset</Text>
