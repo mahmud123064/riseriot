@@ -6,9 +6,9 @@ import { getChallenge } from '../../constants/challenges'
 import type { ChallengeId } from '../../store/alarms'
 import { useTheme } from '../../theme/ThemeProvider'
 import { Text } from '../Text'
+import { DanceMovementChallenge } from './DanceMovementChallenge'
 import { MathChallenge } from './MathChallenge'
-import { MovementChallenge } from './MovementChallenge'
-import { PoseMovementChallenge } from './PoseMovementChallenge'
+import { PushupChallenge } from './PushupChallenge'
 
 type ChallengeRunnerProps = {
   /** Null keeps the modal closed. */
@@ -20,8 +20,11 @@ type ChallengeRunnerProps = {
 }
 
 /**
- * Full-screen wake-up challenge. This is opened from an alarm card to test
- * or directly by AlarmGate when an alarm rings.
+ * Full-screen wake-up challenge runner.
+ * - 'pushup': Full-screen front camera with cyan stick figure skeleton and push-up counter.
+ * - 'dance': Full-screen front camera with dance detection HUD (no skeleton).
+ * - 'movement': Full-screen front camera with body exercise detection HUD (no skeleton).
+ * - 'math': Modal sum solver.
  */
 export function ChallengeRunner({ challenge, onClose, onSkip }: ChallengeRunnerProps) {
   const insets = useSafeAreaInsets()
@@ -37,8 +40,12 @@ export function ChallengeRunner({ challenge, onClose, onSkip }: ChallengeRunnerP
       statusBarTranslucent
       onRequestClose={handleSkip}
     >
-      {challenge === 'camera' ? (
-        <PoseMovementChallenge onComplete={onClose} onSkip={handleSkip} />
+      {challenge === 'pushup' ? (
+        <PushupChallenge onComplete={onClose} onSkip={handleSkip} />
+      ) : challenge === 'dance' ? (
+        <DanceMovementChallenge mode="dance" onComplete={onClose} onSkip={handleSkip} />
+      ) : challenge === 'movement' ? (
+        <DanceMovementChallenge mode="movement" onComplete={onClose} onSkip={handleSkip} />
       ) : challenge && meta && Icon ? (
         <View
           className="flex-1 bg-app-bg px-5"
@@ -75,11 +82,7 @@ export function ChallengeRunner({ challenge, onClose, onSkip }: ChallengeRunnerP
           <Text className="mt-3 text-sm text-app-muted">{meta.description}</Text>
 
           <View className="flex-1 justify-center pb-6">
-            {challenge === 'math' ? (
-              <MathChallenge onComplete={onClose} />
-            ) : (
-              <MovementChallenge challenge={challenge} onComplete={onClose} />
-            )}
+            <MathChallenge onComplete={onClose} />
           </View>
         </View>
       ) : null}

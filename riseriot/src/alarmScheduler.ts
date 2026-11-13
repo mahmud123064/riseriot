@@ -98,9 +98,12 @@ export function toNativeSpec(alarm: Alarm): NativeAlarmSpec {
 }
 
 function normalizeFired(payload: NativeFiredPayload): AlarmFiredPayload {
+  let challenge = payload.challenge
+  if (challenge === 'shake') challenge = 'movement'
+  if (challenge === 'camera') challenge = 'pushup'
   return {
     id: payload.id,
-    challenge: isChallengeId(payload.challenge) ? payload.challenge : 'math',
+    challenge: isChallengeId(challenge) ? challenge : 'math',
     soundId: isAlarmSoundId(payload.soundId) ? payload.soundId : DEFAULT_SOUND_ID,
     label: typeof payload.label === 'string' && payload.label ? payload.label : 'Alarm',
     firedAt:

@@ -97,14 +97,20 @@ export async function readAlarmHistory(
     cutoff,
   )
   return rows
-    .filter((row) => isChallengeId(row.challenge))
-    .map((row) => ({
-      id: row.id,
-      alarmId: row.alarm_id,
-      challenge: row.challenge as ChallengeId,
-      soundId: row.sound_id,
-      firedAt: row.fired_at,
-      dismissedAt: row.dismissed_at,
-      dismissedWith: row.dismissed_with,
-    }))
+    .map((row) => {
+      let challenge = row.challenge
+      if (challenge === 'shake') challenge = 'movement'
+      if (challenge === 'camera') challenge = 'pushup'
+      if (!isChallengeId(challenge)) return null
+      return {
+        id: row.id,
+        alarmId: row.alarm_id,
+        challenge,
+        soundId: row.sound_id,
+        firedAt: row.fired_at,
+        dismissedAt: row.dismissed_at,
+        dismissedWith: row.dismissed_with,
+      }
+    })
+    .filter((entry): entry is AlarmHistoryEntry => entry !== null)
 }

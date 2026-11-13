@@ -45,7 +45,7 @@ const INITIAL_ALARMS: Alarm[] = [
     hour: 8,
     minute: 30,
     days: [6],
-    challenge: 'shake',
+    challenge: 'pushup',
     soundId: DEFAULT_SOUND_ID,
     enabled: false,
   },

@@ -7,29 +7,33 @@ type PoseSkeletonProps = {
   landmarks: PoseLandmark[]
   width: number
   height: number
-  isMoving?: boolean
+  isDown?: boolean
 }
 
-/** Standard MediaPipe pose connection pairs between landmark indices. */
+/**
+ * Standard MediaPipe pose connection pairs for push-up tracking.
+ * Connects shoulders, arms, chest, torso, hips, and legs.
+ */
 const POSE_CONNECTIONS: readonly (readonly [number, number])[] = [
-  // Torso
+  // Shoulders (horizontal bar across chest)
   [11, 12],
-  [11, 23],
-  [12, 24],
-  [23, 24],
   // Left arm
   [11, 13],
   [13, 15],
   // Right arm
   [12, 14],
   [14, 16],
+  // Torso / back box (as in push-up reference image)
+  [11, 23],
+  [12, 24],
+  [23, 24],
   // Left leg
   [23, 25],
   [25, 27],
   // Right leg
   [24, 26],
   [26, 28],
-  // Head to neck midpoint
+  // Head to neck/shoulders
   [0, 11],
   [0, 12],
 ]
@@ -43,19 +47,19 @@ export const PoseSkeleton = memo(function PoseSkeleton({
   landmarks,
   width,
   height,
-  isMoving = false,
+  isDown = false,
 }: PoseSkeletonProps) {
   if (!landmarks || landmarks.length < 29 || width <= 0 || height <= 0) {
     return null
   }
 
-  // Neon green when moving actively, vibrant violet/cyan when still
-  const strokeColor = isMoving ? '#22c55e' : '#a855f7'
-  const glowColor = isMoving ? 'rgba(34, 197, 94, 0.4)' : 'rgba(168, 85, 247, 0.35)'
+  // Cyan / teal stick figure as shown in the reference push-up image
+  const strokeColor = isDown ? '#22c55e' : '#00f5d4'
+  const glowColor = isDown ? 'rgba(34, 197, 94, 0.5)' : 'rgba(0, 245, 212, 0.45)'
   const jointFill = '#ffffff'
 
   // Map normalized coords [0..1] to pixel coords.
-  // Front camera preview is mirrored horizontally, so we invert X to align overlay.
+  // Front camera preview is mirrored horizontally, so invert X.
   const toPoint = (lm: PoseLandmark) => ({
     x: (1 - lm.x) * width,
     y: lm.y * height,
@@ -84,7 +88,7 @@ export const PoseSkeleton = memo(function PoseSkeleton({
             x2={p2.x}
             y2={p2.y}
             stroke={glowColor}
-            strokeWidth={10}
+            strokeWidth={12}
             strokeLinecap="round"
           />
         )
@@ -114,7 +118,7 @@ export const PoseSkeleton = memo(function PoseSkeleton({
         const pt = points[idx]
         if (!pt?.visible) return null
 
-        // Give the head (idx 0) a larger circle
+        // Large head node
         if (idx === 0) {
           return (
             <Circle
@@ -122,9 +126,9 @@ export const PoseSkeleton = memo(function PoseSkeleton({
               cx={pt.x}
               cy={pt.y}
               r={14}
-              fill="rgba(255, 255, 255, 0.9)"
+              fill="rgba(0, 245, 212, 0.2)"
               stroke={strokeColor}
-              strokeWidth={4}
+              strokeWidth={3.5}
             />
           )
         }

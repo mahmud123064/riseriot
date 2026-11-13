@@ -1,13 +1,11 @@
 import { useCameraPermissions, CameraView } from 'expo-camera'
 import { Accelerometer } from 'expo-sensors'
-import { Flame, Sparkles, UserCheck, X } from 'lucide-react-native'
+import { Activity, PartyPopper, Sparkles, UserCheck, X } from 'lucide-react-native'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
-  LayoutChangeEvent,
   Pressable,
   StyleSheet,
-  useWindowDimensions,
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -20,11 +18,9 @@ import {
   type PoseLandmark,
 } from '../../poseCamera'
 import { Text } from '../Text'
-import { PoseSkeleton } from './PoseSkeleton'
 
 const REQUIRED_MS = 5000
 const MOTION_DELTA_THRESHOLD = 0.012
-const ACCEL_THRESHOLD = 1.3
 
 const ACTIVE_JOINTS = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28]
 
@@ -33,18 +29,20 @@ const RING_STROKE = 10
 const RING_RADIUS = (RING_SIZE - RING_STROKE) / 2
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS
 
-type PoseMovementChallengeProps = {
+type DanceMovementChallengeProps = {
+  mode: 'dance' | 'movement'
   onComplete: () => void
   onSkip?: () => void
 }
 
-export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChallengeProps) {
+export function DanceMovementChallenge({
+  mode,
+  onComplete,
+  onSkip,
+}: DanceMovementChallengeProps) {
   const insets = useSafeAreaInsets()
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions()
-  const [layout, setLayout] = useState({ width: windowWidth, height: windowHeight })
 
   const [permission, requestPermission] = useCameraPermissions()
-  const [landmarks, setLandmarks] = useState<PoseLandmark[]>([])
   const [isMoving, setIsMoving] = useState(false)
   const [hasPerson, setHasPerson] = useState(false)
   const [progressMs, setProgressMs] = useState(0)
@@ -57,13 +55,10 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
   const stillCountRef = useRef(0)
 
   const nativeAvailable = isPoseCameraAvailable()
+  const isDance = mode === 'dance'
 
-  const handleLayout = (e: LayoutChangeEvent) => {
-    const { width, height } = e.nativeEvent.layout
-    if (width > 0 && height > 0) {
-      setLayout({ width, height })
-    }
-  }
+  const accentColor = isDance ? '#c084fc' : '#34d399'
+  const progressColor = isMoving ? '#22c55e' : isDance ? '#a855f7' : '#10b981'
 
   // Handle pose events from the native PoseCamera module
   const handlePose = useCallback(
@@ -78,7 +73,6 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
         return
       }
 
-      setLandmarks(lms)
       setHasPerson(true)
 
       const now = Date.now()
@@ -132,21 +126,19 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
     [onComplete]
   )
 
-  // Fallback to accelerometer if native PoseCamera module is unavailable (e.g. Web or Expo Go)
+  // Fallback to accelerometer in environments without native PoseCamera (e.g. Expo Go)
   useEffect(() => {
     if (nativeAvailable) return
 
     Accelerometer.setUpdateInterval(80)
     const sub = Accelerometer.addListener(({ x, y, z }) => {
       if (completeFiredRef.current) return
-      const magnitude = Math.sqrt(x * x + y * y + z * z)
-      const moving = magnitude > ACCEL_THRESHOLD
+      const mag = Math.sqrt(x * x + y * y + z * z)
+      const moving = mag > 1.3
       setIsMoving(moving)
-
       if (moving) {
         progressMsRef.current = Math.min(REQUIRED_MS, progressMsRef.current + 80)
         setProgressMs(progressMsRef.current)
-
         if (progressMsRef.current >= REQUIRED_MS && !completeFiredRef.current) {
           completeFiredRef.current = true
           setIsComplete(true)
@@ -154,7 +146,6 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
         }
       }
     })
-
     return () => sub.remove()
   }, [nativeAvailable, onComplete])
 
@@ -163,8 +154,8 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
   const remainingSec = Math.max(0, (REQUIRED_MS - progressMs) / 1000).toFixed(1)
 
   return (
-    <View className="flex-1 bg-black" onLayout={handleLayout}>
-      {/* Full-screen Camera Preview */}
+    <View className="flex-1 bg-black">
+      {/* Full-screen Camera Preview without skeleton */}
       {permission?.granted ? (
         nativeAvailable && PoseCameraView ? (
           <PoseCameraView
@@ -177,12 +168,12 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
         )
       ) : (
         <View className="flex-1 items-center justify-center px-6">
-          <ActivityIndicator size="large" color="#a855f7" />
+          <ActivityIndicator size="large" color={accentColor} />
           <Text className="mt-4 text-center text-base text-zinc-300">
             {permission === null
               ? 'Checking camera access…'
               : permission.canAskAgain
-                ? 'Camera access is required to track your wake-up body movement.'
+                ? `Camera access is required for the ${isDance ? 'dance' : 'body movement'} challenge.`
                 : 'Camera permission denied. Enable it in app settings.'}
           </Text>
           {permission && !permission.granted && permission.canAskAgain ? (
@@ -198,16 +189,6 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
         </View>
       )}
 
-      {/* Real-time Skeleton Overlay */}
-      {permission?.granted && nativeAvailable && (
-        <PoseSkeleton
-          landmarks={landmarks}
-          width={layout.width}
-          height={layout.height}
-          isMoving={isMoving}
-        />
-      )}
-
       {/* Floating Header */}
       <View
         style={{
@@ -218,15 +199,29 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
         }}
         className="flex-row items-center justify-between"
       >
-        <View className="flex-row items-center gap-3 rounded-full border border-white/10 bg-black/50 px-4 py-2 backdrop-blur-md">
-          <View className="h-8 w-8 items-center justify-center rounded-full bg-violet-500/30">
-            <Flame size={18} color="#c084fc" />
+        <View className="flex-row items-center gap-3 rounded-full border border-white/10 bg-black/60 px-4 py-2 backdrop-blur-md">
+          <View
+            className={`h-8 w-8 items-center justify-center rounded-full ${
+              isDance ? 'bg-fuchsia-500/30' : 'bg-emerald-500/30'
+            }`}
+          >
+            {isDance ? (
+              <PartyPopper size={18} color="#f0abfc" />
+            ) : (
+              <Activity size={18} color="#6ee7b7" />
+            )}
           </View>
           <View>
-            <Text className="text-xs font-semibold uppercase tracking-wider text-violet-300">
-              Pose Challenge
+            <Text
+              className={`text-xs font-semibold uppercase tracking-wider ${
+                isDance ? 'text-fuchsia-300' : 'text-emerald-300'
+              }`}
+            >
+              {isDance ? 'Dance Challenge' : 'Body Movement'}
             </Text>
-            <Text className="text-sm font-bold text-white">Move Your Body</Text>
+            <Text className="text-sm font-bold text-white">
+              {isDance ? 'Groove for 5s' : 'Move for 5s'}
+            </Text>
           </View>
         </View>
 
@@ -236,14 +231,14 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
             accessibilityLabel="Close challenge"
             hitSlop={12}
             onPress={onSkip}
-            className="h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/50 backdrop-blur-md"
+            className="h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/60"
           >
             <X size={18} color="#e4e4e7" />
           </Pressable>
         ) : null}
       </View>
 
-      {/* Middle Status Pill */}
+      {/* Center Status Pill */}
       <View
         style={{
           position: 'absolute',
@@ -258,27 +253,31 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
           <View className="flex-row items-center gap-2 rounded-full border border-amber-500/30 bg-amber-950/70 px-4 py-2">
             <UserCheck size={16} color="#fbbf24" />
             <Text className="text-xs font-semibold text-amber-200">
-              Step back into camera view
+              Step into camera frame
             </Text>
           </View>
         ) : isMoving ? (
           <View className="flex-row items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-950/80 px-4 py-2">
             <Sparkles size={16} color="#4ade80" />
             <Text className="text-xs font-bold text-emerald-300">
-              Active movement detected! Keep going!
+              {isDance ? '🔥 Great rhythm! Keep dancing!' : '🔥 Active movement detected! Keep going!'}
             </Text>
           </View>
         ) : (
-          <View className="flex-row items-center gap-2 rounded-full border border-violet-500/30 bg-black/60 px-4 py-2">
-            <Flame size={16} color="#c084fc" />
-            <Text className="text-xs font-semibold text-violet-200">
-              Move your body (push-ups, dance, jump)
+          <View className="flex-row items-center gap-2 rounded-full border border-white/15 bg-black/60 px-4 py-2">
+            {isDance ? (
+              <PartyPopper size={16} color="#c084fc" />
+            ) : (
+              <Activity size={16} color="#34d399" />
+            )}
+            <Text className="text-xs font-semibold text-zinc-200">
+              {isDance ? 'Start dancing and grooving!' : 'Move your body to wake up!'}
             </Text>
           </View>
         )}
       </View>
 
-      {/* Bottom Floating HUD with Circular Gauge */}
+      {/* Bottom Floating HUD: 5-Second Countdown Ring */}
       <View
         style={{
           position: 'absolute',
@@ -288,7 +287,7 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
           alignItems: 'center',
         }}
       >
-        <View className="w-full items-center rounded-3xl border border-white/10 bg-black/60 px-6 py-5 backdrop-blur-lg">
+        <View className="w-full items-center rounded-3xl border border-white/10 bg-black/70 px-6 py-5 backdrop-blur-lg">
           <View className="relative items-center justify-center" style={{ width: RING_SIZE, height: RING_SIZE }}>
             <Svg width={RING_SIZE} height={RING_SIZE} style={{ transform: [{ rotate: '-90deg' }] }}>
               <Circle
@@ -303,7 +302,7 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
                 cx={RING_SIZE / 2}
                 cy={RING_SIZE / 2}
                 r={RING_RADIUS}
-                stroke={isMoving ? '#22c55e' : '#a855f7'}
+                stroke={progressColor}
                 strokeWidth={RING_STROKE}
                 strokeDasharray={RING_CIRCUMFERENCE}
                 strokeDashoffset={strokeDashoffset}
@@ -321,10 +320,18 @@ export function PoseMovementChallenge({ onComplete, onSkip }: PoseMovementChalle
           </View>
 
           <Text className="mt-4 text-center text-sm font-semibold text-white">
-            {isMoving ? '🔥 Keep moving!' : 'Move your body to dismiss alarm'}
+            {isMoving
+              ? isDance
+                ? '🎶 Dance rhythm active!'
+                : '⚡ Active body motion!'
+              : isDance
+                ? 'Dance in front of the camera'
+                : 'Move your body to dismiss alarm'}
           </Text>
           <Text className="mt-1 text-center text-xs text-zinc-400">
-            {progressMs >= REQUIRED_MS ? 'Done! Alarm dismissed!' : 'Detects push-ups, dancing, and exercises'}
+            {progressMs >= REQUIRED_MS
+              ? 'Complete! Alarm dismissed!'
+              : 'Requires 5 seconds of active movement'}
           </Text>
         </View>
       </View>

@@ -1,6 +1,6 @@
-import { Camera, Vibrate, Zap, type LucideIcon } from 'lucide-react-native'
+import { Activity, Dumbbell, PartyPopper, Zap, type LucideIcon } from 'lucide-react-native'
 
-export const CHALLENGE_IDS = ['math', 'shake', 'camera'] as const
+export const CHALLENGE_IDS = ['math', 'pushup', 'dance', 'movement'] as const
 
 export type ChallengeId = (typeof CHALLENGE_IDS)[number]
 
@@ -23,16 +23,22 @@ export const CHALLENGES: Challenge[] = [
     Icon: Zap,
   },
   {
-    id: 'shake',
-    label: 'Shake for 5s',
-    description: 'Keep shaking the phone for five seconds.',
-    Icon: Vibrate,
+    id: 'pushup',
+    label: 'Push-up challenge',
+    description: 'Do 5 push-ups in front of the camera with live stick figure tracking.',
+    Icon: Dumbbell,
   },
   {
-    id: 'camera',
-    label: 'Pose & move for 5s',
-    description: 'Move your body (push-ups, dance, exercises) in front of the camera.',
-    Icon: Camera,
+    id: 'dance',
+    label: 'Dance challenge',
+    description: 'Dance and groove in front of the camera for 5 seconds to wake up.',
+    Icon: PartyPopper,
+  },
+  {
+    id: 'movement',
+    label: 'Body movement',
+    description: 'Move your body (exercise, stretch) in front of the camera for 5 seconds.',
+    Icon: Activity,
   },
 ]
 

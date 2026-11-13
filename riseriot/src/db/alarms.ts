@@ -38,14 +38,17 @@ function toAlarm(row: AlarmRow): Alarm | null {
   if (typeof row.id !== 'string' || row.id.length === 0) return null
   if (!Number.isInteger(row.hour) || row.hour < 0 || row.hour > 23) return null
   if (!Number.isInteger(row.minute) || row.minute < 0 || row.minute > 59) return null
-  if (!isChallengeId(row.challenge)) return null
+  let challenge = row.challenge
+  if (challenge === 'shake') challenge = 'movement'
+  if (challenge === 'camera') challenge = 'pushup'
+  if (!isChallengeId(challenge)) return null
 
   return {
     id: row.id,
     hour: row.hour,
     minute: row.minute,
     days: parseDays(row.days),
-    challenge: row.challenge,
+    challenge,
     // Rows saved before a sound was renamed or retired fall back to the default.
     soundId: isAlarmSoundId(row.sound_id) ? row.sound_id : DEFAULT_SOUND_ID,
     enabled: row.enabled === 1,
