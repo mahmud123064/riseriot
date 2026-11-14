@@ -1,10 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient'
 import { Bell, ChevronRight, Flame, Heart, Moon, Sun, Sunset } from 'lucide-react-native'
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { Pressable, View } from 'react-native'
+import { Image, Pressable, View } from 'react-native'
 
 import { Text } from '../components/Text'
 import { Toggle } from '../components/Toggle'
+import { UpcomingAlarmsModal } from '../components/UpcomingAlarmsModal'
 import { getChallenge } from '../constants/challenges'
 import { getAlarms, subscribeAlarms, toggleAlarm } from '../store/alarms'
 import { useTheme } from '../theme/ThemeProvider'
@@ -31,6 +32,7 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
   const { tokens } = useTheme()
   const alarms = useSyncExternalStore(subscribeAlarms, getAlarms)
   const [now, setNow] = useState(() => new Date())
+  const [upcomingModalOpen, setUpcomingModalOpen] = useState(false)
 
   // Refresh every 10s so the countdown, greeting, and next alarm stay current.
   useEffect(() => {
@@ -56,21 +58,32 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
   return (
     <View className="gap-6">
       <View className="flex-row items-center justify-between">
-        <View>
-          <Text className="text-sm text-app-muted">{date}</Text>
-          <Text
-            variant="display"
-            className="mt-1 text-[30px] font-bold tracking-[-.04em] text-app-ink"
-          >
-            {greeting}
-          </Text>
+        <View className="flex-row items-center gap-3">
+          <Image
+            source={require('../../assets/icon.png')}
+            style={{ width: 44, height: 44, borderRadius: 12 }}
+            resizeMode="contain"
+          />
+          <View>
+            <Text className="text-sm text-app-muted">{date}</Text>
+            <Text
+              variant="display"
+              className="mt-0.5 text-[24px] font-bold tracking-[-.04em] text-app-ink"
+            >
+              {greeting}
+            </Text>
+          </View>
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel="Notifications"
-          className="rounded-full border border-app-line bg-app-surface p-3"
+          accessibilityLabel="Upcoming alarms"
+          onPress={() => setUpcomingModalOpen(true)}
+          className="relative rounded-full border border-app-line bg-app-surface p-3"
         >
           <Bell size={19} color={tokens.ink} />
+          {alarms.some((alarm) => alarm.enabled) ? (
+            <View className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-app-accent-strong" />
+          ) : null}
         </Pressable>
       </View>
 
@@ -104,11 +117,11 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
                 <Toggle active={next.alarm.enabled} onClick={() => toggleAlarm(next.alarm.id)} />
               </View>
 
-              <View className="mt-5 flex-row items-end">
+              <View className="mt-5 flex-row items-baseline gap-2.5">
                 <Text variant="display" className="text-7xl font-bold tracking-[.1em] text-white">
                   {nextTime.time}
                 </Text>
-                <Text variant="display" className="mb-2 ml-2 text-xl text-white/70">
+                <Text variant="display" className="text-xl font-semibold text-white/70">
                   {nextTime.meridiem}
                 </Text>
               </View>
@@ -186,6 +199,11 @@ export function HomeScreen({ go }: { go: (tab: TabId) => void }) {
           </View>
         </View>
       </View>
+      <UpcomingAlarmsModal
+        visible={upcomingModalOpen}
+        onClose={() => setUpcomingModalOpen(false)}
+        onManage={() => go('alarms')}
+      />
     </View>
   )
 }

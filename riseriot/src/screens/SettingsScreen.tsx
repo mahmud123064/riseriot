@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react-native'
 import { useState, useSyncExternalStore } from 'react'
-import { Pressable, View } from 'react-native'
+import { Image, Pressable, View } from 'react-native'
 
 import { AlarmPermissionCard } from '../components/AlarmPermissionCard'
 import { Header } from '../components/Header'
@@ -167,6 +167,21 @@ export function SettingsScreen() {
             {target ? <ChevronRight size={19} color={tokens.accentText} /> : null}
           </Pressable>
         ))}
+      </View>
+
+      <View className="items-center gap-1 rounded-[20px] border border-app-line bg-app-panel p-5">
+        <Image
+          source={require('../../assets/icon.png')}
+          style={{ width: 60, height: 60, borderRadius: 16 }}
+          resizeMode="contain"
+        />
+        <Text variant="display" className="mt-2 text-base font-bold text-app-ink">
+          RiseRiot
+        </Text>
+        <Text className="text-xs text-app-muted">Version 1.0.0 (Build 1)</Text>
+        <Text className="mt-1 text-center text-xs text-app-faint">
+          Rise & riot against sleep with AI motion tracking
+        </Text>
       </View>
     </View>
   )

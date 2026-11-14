@@ -105,22 +105,24 @@ export function AlarmsScreen() {
                     onPress={() => handleOpenEdit(alarm)}
                     className="flex-1"
                   >
-                    <Text
-                      variant="display"
-                      className={`text-5xl font-bold tracking-[-.06em] ${
-                        alarm.enabled ? 'text-app-ink' : 'text-app-ink-dim'
-                      }`}
-                    >
-                      {time}
+                    <View className="flex-row items-baseline gap-2.5">
                       <Text
                         variant="display"
-                        className={`ml-2 text-lg tracking-normal ${
+                        className={`text-5xl font-bold tracking-[-.06em] ${
+                          alarm.enabled ? 'text-app-ink' : 'text-app-ink-dim'
+                        }`}
+                      >
+                        {time}
+                      </Text>
+                      <Text
+                        variant="display"
+                        className={`text-lg font-semibold tracking-normal ${
                           alarm.enabled ? 'text-app-muted' : 'text-app-faint'
                         }`}
                       >
                         {meridiem}
                       </Text>
-                    </Text>
+                    </View>
                     <Text className="mt-2 text-sm text-app-muted">
                       {formatAlarmDays(alarm.days)}
                     </Text>

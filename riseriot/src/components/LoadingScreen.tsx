@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Image, StyleSheet, Text, View } from 'react-native'
 
 /**
  * Shown while the app boots (fonts + saved-state load). Self-contained on purpose:
@@ -7,8 +7,13 @@ import { StyleSheet, Text, View } from 'react-native'
 export function LoadingScreen() {
   return (
     <View style={styles.root}>
-      <Text style={styles.emoji}>😊</Text>
-      <Text style={styles.label}>Please wait…</Text>
+      <Image
+        source={require('../../assets/icon.png')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+      <Text style={styles.brandTitle}>RiseRiot</Text>
+      <Text style={styles.label}>Rise & riot against sleep…</Text>
     </View>
   )
 }
@@ -18,9 +23,23 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 8,
     backgroundColor: '#0d091a',
   },
-  emoji: { fontSize: 56 },
-  label: { color: '#faf8ff', fontSize: 16 },
+  logo: {
+    width: 104,
+    height: 104,
+    borderRadius: 24,
+    marginBottom: 8,
+  },
+  brandTitle: {
+    color: '#faf8ff',
+    fontSize: 24,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  label: {
+    color: '#bda6d8',
+    fontSize: 14,
+  },
 })
